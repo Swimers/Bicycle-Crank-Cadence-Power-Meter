@@ -1,0 +1,184 @@
+CadenceSensor V1.0 原理图审阅（2026-10-30）
+
+结论：当前版本尚不宜直接投板。已确认 ADS1220 时钟与片选网络接反；
+VOUT 总输出电容需要重新核算；自动 Ship Mode 关机功能与设计方案不一致。
+其余核心供电、加速度计、MCU 最小系统、电桥及 SWD 的图面连接总体成立。
+此结论是 SVG 静态审阅，不能代替原始 EDA 网络表/ERC、PCB 检查或上电实测。
+
+审阅依据与方法
+读取 Doc/CadenceSensor_Hardware_Design.md，对 Doc/Schematic1 中全部五页 SVG
+渲染、逐页检查，并对疑点检查 SVG 导线端点和 data-group-id。
+第1页 USB_C_INPUT 是空白页；USB 实际位于第2页 POWER_MANAGEMENT。
+参考本地 nPM1100 产品规范（文件名含 v1.2，正文实际为 v1.4）、
+nRF52832 产品规范、SC7A20H v0.7 和 ADS1220 2026年5月版手册；
+同时对照 Nordic、TI、Diodes 官方在线资料。
+设计文档中的历史结论、修改目标和待办只作为需求背景，不视为新版连接已通过。
+没有修改原始原理图或设计方案。
+
+一、需要优先处理的发现
+
+1. [确定的连接错误] 第5页 U4 的 SCLK 与 CS# 网络接反。
+   当前：P0.19 / ADS_CS -> R18 47Ω -> U4 pin1 SCLK。
+         P0.16 / ADS_SCK -> R19 47Ω -> U4 pin2 CS#。
+   正确：P0.16 / ADS_SCK -> 串阻 -> U4 pin1 SCLK。
+         P0.19 / ADS_CS -> 串阻 -> U4 pin2 CS#。
+   影响：按方案里的引脚配置驱动时，ADC 不能正常接收 SPI 命令和输出采样。
+   建议直接交换第5页两条网络的连接，保留方案和 MCU 页的引脚分工。
+   nRF52832 可以重映射 GPIO，因此已制板也可通过交换固件中的 SCK/CS 引脚补救；
+   但此时必须同步更新原理图网络名和引脚表，避免后续调试再次用错。
+   依据：TI ADS1220 PW/TSSOP 引脚表第4页，pin1=SCLK，pin2=CS。
+
+2. [超出推荐范围的风险] 第2/3/4/5页 VOUT 电容配置需要修改或提供降容核算。
+   C8=10µF，C14=47µF，C23=4.7µF；另有 C1/C3/C4/C5/C19/C22 各100nF。
+   上述均在同一 VOUT 网络，标称总计约62.3µF，不能只看 Buck 旁边的 C8。
+   nPM1100 Buck 要求输出总有效电容为6~20µF（官方规范6.3.3）。
+   影响：超出厂家已规定的工作条件，启动、负载瞬态和稳压行为不能据此认定合格。
+   建议先取消 C14 47µF 或设置 DNP，保留必要的各芯片去耦；
+   对 C8、C23 及其余 VOUT 电容按3V偏压、容差和温度核算总有效电容为6~20µF。
+   取消 C14 后标称约15.3µF，但仍须检查 MLCC 降容后的下限。
+   不把 DEC1、DEC3、DEC4 上的电容当作直接并联的 VOUT 电容相加。
+   另须确认 L2 的饱和/允许电流至少350mA、DCR不大于400mΩ。
+
+3. [确定的功能缺口] 第2/3页 MCU 已不再连接 SHPACT，无法自动进入 Ship Mode。
+   当前 P0.09 仅名为 P0.09，P0.10 仅名为 P0.10；两者没有连接 PMIC Ship 网络。
+   SHPACT 由 SW2 接 VBAT 拉高，R24=500kΩ拉低；SHPHLD 由 R25=100kΩ
+   上拉 VBAT，SW3 拉低。这实现了独立的硬件进入/退出路径。
+   因此原先 VBAT 直接加到 MCU GPIO 的风险在新版图面上已解除。
+   但是方案中的“无运动后 MCU 自动进入 Ship Mode”尚未实现。
+   若只需手动关机可保留并修改功能说明；若要自动关机，增加 MCU 安全控制路径。
+   不可直接把当前 SHPACT 并到 P0.10：按 SW2 时仍会将 VBAT 加到该网络。
+   可移除 VBAT 按键驱动，改为 MCU 控制；保留该按键时需设计隔离/电平转换。
+   按键实物内部共端、符号与封装编号仍须按 TS24CA 的实际采购型号核对。
+   无 VBUS、SHPHLD 为高且 SHPACT 高至少200ms 才进入 Ship Mode；
+   SHPHLD 低至少200ms 或接入 USB 可以退出。VBUS 必须已降到规定阈值以下。
+
+4. [确定的保护缺口] 第2页 R12 是固定10kΩ，不是电池 NTC。
+   充电器只能看到固定的温度等效电阻，不能监测电池实际过热或过冷。
+   实际装车充电前，应换为与电池热耦合的10kΩ NTC（手册推荐B25/50=3380K），
+   或明确采用具有适当独立温度保护的电池方案。
+   Battery 为两针接口，图中没有独立电池保护电路，也不能证明电池包自带保护。
+   必须落实电池过充、过放、过流和温度保护规格。
+   这不是 ADC 通信问题，但属于当前充电功能必须落实的硬件条件。
+
+二、已核对的连接和配置
+
+USB 与 nPM1100：
+  - USB2 的 CC1、CC2 分别通过 R27、R26 5.1kΩ到地，受电端配置成立。
+  - DP1/DP2 同为 D_P，DN1/DN2 同为 D_N，分别到 PMIC pin20/pin19。
+  - VBUS 与地在右侧有无连接点的交叉；SVG 导线组彼此独立，未见图面短接。
+    原始 EDA 中仍应高亮网络确认，不能把 SVG 推断当作网络表/ERC结果。
+  - U2 pin1 接电感后的 VOUT，pin22 SW 接 L2，pin21 DEC 接 C6。
+  - pin2 与 pin3 均接 DEC，高/高选择3.0V，连接正确。
+  - pin4、pin23、EP/pin25 接地。pin13/18/24 留空。
+  - 库文字仍错误：pin3 应由 VOUTBSET2 改为 VOUTBSET0；pin4 应由 NC 改为 AVSS。
+    当前实体引脚连接正确，但库电气类型、焊盘映射也要同步核对，不能只改显示文字。
+  - ISET 是独立网络到 P0.08，没有接 DEC；图中的文字/接地符号重叠容易误读。
+  - MODE 到 P0.07，作用是 Buck 自动/强制 PWM 模式，不是充电使能。
+  - ISET 控制 USB 输入限流，不是电池充电电流；复位和拔 USB 时应为低。
+    无 USB 枚举能力的 nRF52832 不应对 SDP 端口直接假定已获准500mA。
+    需要明确 MCU 复位期间 ISET/MODE 的确定电平，必要时预留外部下拉。
+  - VTERMSET 接 VSYS，高电平；对于标准终止电压的 QDAA，目标充满电压4.2V。
+  - R11=30kΩ对应标称20mA充电电流，须与电池容量及允许充电电流匹配。
+  - LED5/LED6 由 CHG/ERR 内部约5mA恒流下拉驱动，无串联电阻不是漏画。
+  - LED4 当前由 VBUS 经 R10 供电，已经不是旧文档中的 VSYS 常亮耗电支路。
+  - 缺少 USB 接口 ESD/浪涌器件；建议在连接器附近补齐适用的 VBUS 和信号防护。
+
+nRF52832：
+  - pin13/36/48 到 VOUT；pin31/45/49 到地。
+  - DEC1=100nF，DEC3=100pF，DEC2 的 C20 标NC、不焊，符合 QFAA 参考方案。
+    C20 的NC应在BOM中明确为DNP，而不是待填容量。
+  - DCC -> 10µH与15nH串联 -> DEC4，DEC4有1µF到地，连接与参考方案一致。
+  - 32MHz X1 的振荡端到 XC1/XC2，另外两端接地；C15/C16各12pF。
+  - 新版已增加32.768kHz X2到XL1/XL2，C10/C12各12pF，不能沿用“未装低频晶振”的旧说明。
+  - 晶振只标频率，缺少实际料号，尚不能验证CL、ESR、精度及四脚封装映射。
+    近似CL=C1*C2/(C1+C2)+寄生电容；12pF不是对任意晶振都适用。
+  - RF 的0.8pF/3.9nH拓扑与 Nordic 参考基本一致；天线具体布局、净空及金属曲柄
+    影响不在 SVG 中，不能据此保证 BLE 距离或匹配合格。
+  - 调试口新版名称为 H3：1=GND、2=VOUT/VTref、3=P0.21、4=SWDCLK、5=SWDIO。
+    这是自定义排针顺序；不能直接套接标准J-Link针序，也不能由VTref随意灌入5V。
+  - RES 按键把 P0.21 拉低，C13=100nF并联；固件必须设置 UICR.PSELRESET
+    才能把该GPIO作为硬件RESET使用。SWD本身不以这项配置为前提。
+  - SW1 是 P0.11 串1kΩ到按键再到地，需启用输入上拉；LED8为P0.12高有效。
+  - LED7 仍是VOUT常亮灯，会持续耗电，建议DNP或改为受控指示。
+
+SC7A20H：
+  - VDD/VDDIO到VOUT并分别100nF去耦；GND/GNDIO到地。
+  - CS拉高为I²C，SDO拉高为7位地址0x19；4.7kΩ SDA/SCL上拉连接成立。
+  - pin4虽标NC，但本器件手册要求接GND，当前连接正确；pin11留空正确。
+  - INT1到P0.13；INT2只留网络标签、未接MCU，不影响使用INT1。
+  - 按本地v0.7手册，WHO_AM_I(0x0F)=0x11；不要套用其他兼容加速度计的身份值。
+  - 应变/踏频软件需要主动配置ODR、量程、BDU和中断；连通不代表已有运动检测。
+
+ADS1220与电桥（除前述SCK/CS错误）：
+  - pin16 DIN到P0.17；pin15 DOUT到P0.18；pin14 DRDY到P0.20，各串47Ω。
+  - AVDD/DVDD同接VOUT并各100nF去耦，AVSS/DGND接地，CLK接地使用内部时钟。
+  - AIN0(pin11)经R23接固定电阻桥臂中点AIN+；AIN1(pin10)经R22接应变片中点AIN-。
+  - SG1/SG2外接350Ω应变片，R4/R16各350Ω，上下激励VOUT/GND，半桥结构成立。
+    两片的贴装方向必须使受力电阻变化形成差分增量，否则可能抵消；这不能由电路图保证。
+  - REFP0/REFN0、AIN2、AIN3未使用时留空不构成缺线；固件不可选这些悬空脚作参考/信号。
+  - C7跨两路ADC输入，R22/R23各1kΩ。只计外部RC时差分极点约796Hz，
+    计入两侧350Ω桥臂的戴维南电阻后约677Hz；最终带宽还取决于ADC数字滤波。
+  - 建议预留CS到DVDD的47~100kΩ上拉，使MCU复位时明确取消片选。
+  - 电桥目前持续激励，3V时约8.57mA、25.7mW。让ADS1220休眠不会切断电桥。
+    若目标是长续航或MCU System OFF低功耗，需另加桥路供电控制并验证稳定时间。
+    单纯启用ADS1220内部低侧开关也不会改变当前桥路直接接地的连接。
+
+电池检测：
+  - Q1的N管源极到地、栅极到BAT_MON_EN，漏极拉P管栅极；
+    P管源极到VBAT，漏极到R6；R3/R5提供关断偏置，控制拓扑成立。
+  - BAT_MON_EN高电平开启；R6=1.5MΩ、R7=220kΩ，分压比0.127907。
+    VBAT=4.2V时BAT_MON约0.537V，电池电压=采样电压×7.81818。
+  - 分压输出等效源阻抗约191.9kΩ，不能直接使用短采集时间。
+    按nRF52832表89，TACQ至少15µs，建议20µs或更长并实测；
+    使能开关后等待节点稳定，再采样。若增加滤波电容，等待时间还应覆盖其RC。
+
+三、基本功能所需的固件配置
+
+1) 初始化BAT_MON_EN为低；ISET保持低，按需求控制MODE。
+   不把PMIC MODE当作充电开关，不在USB未协商时随意提高SDP取电限额。
+2) 配置P0.11上拉，P0.12输出；需要RESET功能时配置UICR.PSELRESET。
+   LFCLK与实际X2装配一致，只有晶振和负载已确认后才选择外部LFXO。
+   DCDC可按Nordic要求启用，未启用时默认LDO工作不等同于硬件故障。
+3) I²C先用100kHz，地址0x19，读取身份寄存器并配置采样/INT1。
+   加速度量程需覆盖曲柄旋转的重力和离心加速度，按安装半径与最高踏频计算。
+4) 修正SCK/CS后，ADS1220使用SPI mode1（CPOL=0、CPHA=1）、MSB first；
+   调试先用低速时钟，RESET、配置寄存器、回读比对，再START/SYNC并观察DRDY。
+   选择AINP=AIN0、AINN=AIN1；初期低增益检查零点，再按满载信号和失调提高PGA。
+   当前VOUT激励/GND回路可选AVDD-AVSS比例参考（VREF[1:0]=11），IDAC关闭；
+   内部2.048V参考也可用，但不抵消桥路激励变化。外部参考脚当前没有接参考源。
+   PGA增益、共模、输入差分量和最大零点失调必须共同核算，不能直接固定128倍。
+5) 电池ADC按上述高源阻抗设置，标定零点和比例；检测完关闭BAT_MON_EN。
+6) 扭矩先做无载零点、已知砝码/力臂标定，再检查符号、温漂、转速和BLE输出。
+
+四、修改后的验收步骤（尚未执行）
+
+A. 原始EDA运行ERC；高亮VBUS/GND、DEC/ISET、ADS_SCK/ADS_CS及全部电源。
+   核对所有器件符号与PCB焊盘，特别是U2 pin3/4/25、USB壳脚、晶振、Q1和四脚按键。
+   若修改只存在原工程而不在这批SVG中，必须重新导出后再复核。
+B. 不接电池先检查短路，限流5V上电；测VBUS、VSYS、VOUT与各芯片电源脚，
+   用示波器检查VOUT启动、纹波、负载突变，确认总有效电容修改后的稳压行为。
+C. SWD识别芯片、烧录最小程序、验证复位和LED8；扫描I²C并回读传感器身份。
+   检查ADC寄存器回读、DRDY节奏、无载桥路两个中点约VOUT/2及载荷响应。
+D. 接入符合规格的电池，核查充电电流约20mA、终止电压、CHG/ERR及热保护。
+   单独测试USB正反插、插拔切换、低电量运行和VOUT跌落时ADC的工作边界。
+E. 无USB时分别验证SW2关机、SW3唤醒和USB唤醒，记录Ship/运行/休眠电流。
+   当前图只支持手动Ship；自动Ship测试须在增加安全控制路径后进行。
+F. 完成PCB DRC与Nordic参考RF布局核对，装到实际金属曲柄后验证BLE与测量噪声。
+
+五、官方参考
+
+TI ADS1220 数据手册，PW引脚表、SPI、参考源、PGA及桥路测量：
+https://www.ti.com/lit/ds/symlink/ads1220.pdf
+Nordic nPM1100 QFN 引脚定义：
+https://docs.nordicsemi.com/r/bundle/ps_npm1100/page/chapters/pin.html
+Nordic nPM1100 Buck，输出电压、输出电容和电感条件：
+https://docs.nordicsemi.com/r/bundle/ps_npm1100/page/chapters/core_components/buck/doc/frontpage.html
+Nordic nPM1100 系统与Ship Mode：
+https://docs.nordicsemi.com/r/bundle/ps_npm1100/page/product_overview.html
+Nordic nRF52832 产品规范，37.9采集时间、53.2参考电路：
+https://docs-be.nordicsemi.com/bundle/nRF52832_PS_v1.9/raw/resource/enus/nRF52832_PS_v1.9.pdf
+Diodes DMC2400UV 数据手册：
+https://www.diodes.com/datasheet/download/DMC2400UV.pdf
+SC7A20H引脚、地址与WHO_AM_I依据本地SC7A20H目录下v0.7完整手册；
+厂家产品入口（网页提供的简版资料不一定包含完整寄存器定义）：
+https://www.silan.com.cn/en/index.php/product/details/3235.html

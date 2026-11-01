@@ -1,0 +1,125 @@
+CadenceSensor V0.91 原理图复审（2026-10-30）
+
+结论：SPI连接和大电容问题已修正，但Ship控制改动未通过。
+第3页把P0.09、P0.10重新直接接到了第2页的VBAT电平网络，存在过压、
+反向供电和输出争用风险，需先修正再投板。
+固定10kΩ的NTC等效电阻按用户明确要求保留，不再列为待修改问题。
+
+范围：Doc/Schematic1_V0.91下全部5页SVG，逐页渲染审阅。
+对照上次审阅记录，并检查旧SVG压缩包与本次SVG的文字、导线差异。
+旧压缩包中的ADC网络标签已与本次相同，因此SPI修正情况按本次实际图确认，
+不依赖压缩包能否代表上次审阅时的精确快照。
+原始EDA工程、网络表、PCB和实际物料规格未提供；本次不包含ERC或上电实测。
+未修改原始SVG。
+
+一、前三项修改核实
+
+1. ADS1220 SPI：通过图面核对。
+   P0.16/ADS_SCK -> R18 47Ω -> U4 pin1 SCLK。
+   P0.19/ADS_CS  -> R19 47Ω -> U4 pin2 CS#。
+   MOSI->pin16、MISO<-pin15、DRDY<-pin14维持正确。
+
+2. Buck输出电容：47µF已移除，当前数值配置合理。
+   MCU页现在C14=100nF，不再是47µF，原C19已不在本页。
+   同一VOUT网络直接接地的电容为：
+   C8=10µF、C23=4.7µF、C1/C3/C4/C5/C14/C22各100nF，总标称约15.3µF。
+   nPM1100规定有效输出电容6~20µF；具体BOM仍须考虑直流偏压、温度和容差。
+   这是物料核算要求，不再把当前标称电容配置判作错误。
+
+3. 自动Ship控制：有接回MCU，但接法有误，不能视为问题已解决。
+   当前连接：
+   VBAT -> R25 100kΩ -> SHPHLD -> U3 P0.09；SW3按下把该节点接地。
+   VBAT -> SW2 -> SHPACT -> U3 P0.10；R24 500kΩ将该节点拉低。
+   PMIC侧的按键/上拉电路未作隔离修改。
+
+二、必须修改的连接
+
+A. SHPHLD不能由VBAT上拉后直接进入P0.09。
+   满电VBAT约4.2V，MCU VDD约3.0V。
+   P0.09在GPIO模式下的绝对最大输入电压是VDD+0.3V，即约3.3V。
+   R25=100kΩ只限制电流，不是合格的电平转换；钳位和漏电使节点实际电压
+   可能被拉低，不能据此认定满足电气规格。
+   Ship Mode后VDD下降，VBAT仍存在，可能反向供电并破坏低功耗状态。
+   配成输入或开漏也不能消除上拉到VBAT的过压路径。
+   建议：断开P0.09与SHPHLD，保留R25到VBAT和SW3到地；
+   这样MCU断电时仍可通过SW3唤醒，不需要由MCU参与。
+
+B. SHPACT不能在保留VBAT直通SW2的同时直接进入P0.10。
+   按SW2时，VBAT直接施加在P0.10，R24是下拉电阻、不能提供串联隔离。
+   若固件把P0.10输出低，按SW2还会发生VBAT与GPIO低电平输出之间的争用。
+   建议的最小改动：移除SW2到VBAT的硬件驱动支路，让MCU单独控制SHPACT，
+   保留R24下拉；需要手动关机时，由原有SW1用户按键触发固件关机。
+   若必须保留独立硬件SW2关机，则需要增加适当隔离/电平转换后重新审阅，
+   不能只串一个电阻，也不能直接将SW2上端改VOUT后继续与推挽GPIO并接。
+
+建议的完整最小方案：
+  VBAT -- R25 -- SHPHLD -- SW3 -- GND（不接MCU）
+  MCU空闲GPIO，例如P0.22 -- SHPACT；SHPACT -- R24 -- GND
+  删除SW2与VBAT之间对SHPACT的驱动支路。
+  SW1/P0.11通过固件触发关机；SW3或USB完成唤醒。
+  选择P0.22时必须同步修改该引脚原网络标签，不能保留原标签造成一脚多名误连。
+  VBUS断开并降到规定阈值以下、SHPHLD为高时，SHPACT输出高至少200ms。
+  此方案使用PMIC允许的MCU直接控制方式，GPIO高电平来自MCU自身VDD。
+
+三、其他复核发现与配置条件
+
+1. P0.09/P0.10有NFC复用条件。
+   如果最终仍使用P0.10作为SHPACT控制，必须通过UICR.NFCPINS配置为GPIO，
+   配置在复位后生效；只在普通GPIO寄存器中设输出并不足够。
+   使用空闲P0.22等普通GPIO可避免这项要求。
+   NFC模式不是解决上述VBAT直连问题的方法；NFC保护开启时GPIO功能被禁用。
+
+2. U2库文字仍未更正。
+   pin3应为VOUTBSET0，当前仍写VOUTBSET2；pin4应为AVSS，当前仍写NC。
+   实际图面中pin2/3接DEC、pin4/23/25接地，符合3.0V配置。
+   当前不是新增误接，但必须核对库电气类型和PCB焊盘映射，避免ERC遗漏地脚。
+
+3. 电池电压采样有固件约束。
+   R6||R7约191.9kΩ，SAADC采集时间至少15µs，建议20µs或更长。
+   BAT_MON_EN置高后应等待节点稳定，再采样；电压换算系数约7.818。
+   不能把默认短采集时间造成的读数偏低误判为电池问题。
+
+4. LED7和电桥仍持续耗电。
+   LED7由VOUT经1kΩ常亮；350Ω四臂电桥在3V下持续消耗约8.57mA。
+   这不阻止基本功能，但MCU System OFF或ADC POWERDOWN不能关闭这些负载。
+   本次不将其列为必须修改项；若要求运行期间深度低功耗，再增加电桥激励开关。
+
+5. 复位与启动配置。
+   P0.21/RESET需正确配置UICR.PSELRESET；SW1/P0.11需输入上拉。
+   ISET上电/复位时需要保持低，避免未经USB协商提高SDP输入限流。
+   MODE只控制Buck模式；需要确认MCU复位期间ISET/MODE的输入电平有保证，
+   必要时预留外部下拉。不能把它们当作电池充电电流设定引脚。
+
+6. 已复核且未发现新的明确图面错误：
+   - USB CC1/CC2分别5.1kΩ下拉、D+/D-合并方式及PMIC电源节点。
+   - nRF52832 VDD/VSS/EP、DEC去耦、DCC电感链、32MHz及32.768kHz连接。
+   - SWD自定义排针H3、用户按键和受控LED8。
+   - SC7A20H供电、4脚接地、CS/SDO拉高、0x19地址、I²C上拉和INT1。
+   - ADS1220供电、内部时钟、模拟差分输入、电桥及RC滤波。
+   - Q1受控电池分压拓扑。
+   USB第1页仍为空白，实际USB电路在第2页；这属于图纸组织，不是电气错误。
+
+7. SVG不能确认的事项仍需在BOM/PCB阶段检查：
+   晶振实际CL/ESR与四脚编号；AN2051-245天线实物封装和参考布局；
+   TS24CA按键内部共端与PCB焊盘；电感额定电流及MLCC有效电容。
+   新调整的RES/C14导线有非整数坐标，图面看似相接；建议在EDA中高亮确认
+   P0.21、VOUT和GND各自连通，避免以导出SVG的视觉接触替代网络表检查。
+
+四、修改后的最低验证
+
+先运行原始EDA的ERC，重点高亮两条Ship网络，确认它们不再将VBAT带入MCU。
+限流上电确认VOUT约3V、SWD连接、SC7A20H身份读回及ADS1220寄存器回读。
+用示波器验证无USB时自动Ship与SW3/USB唤醒，进入Ship后检查VOUT确实下降，
+GPIO不存在VBAT反向供电，再测静态电流。
+本次未执行上述实测，不能将“未发现其他图面错误”等同于功能验收已通过。
+
+官方依据：
+nRF52832 GPIO绝对最大额定值：
+https://docs.nordicsemi.com/r/bundle/ps_nrf52832/page/abs_max_ratings.html
+nRF52832 NFC与GPIO复用条件：
+https://docs.nordicsemi.com/r/bundle/ps_nrf52832/page/nfc.html
+nPM1100 Ship Mode及MCU直接控制方式：
+https://docs.nordicsemi.com/r/bundle/ps_npm1100/page/product_overview.html
+nPM1100 Buck输出电容：
+https://docs.nordicsemi.com/r/bundle/ps_npm1100/page/chapters/core_components/buck/doc/frontpage.html
+其余连接沿用上次审阅已核对的芯片手册与本地资料。

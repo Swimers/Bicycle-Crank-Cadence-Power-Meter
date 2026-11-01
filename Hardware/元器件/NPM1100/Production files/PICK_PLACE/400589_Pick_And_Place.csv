@@ -1,0 +1,31 @@
+Altium Designer Pick and Place Locations
+C:\Applications\hardware\pca20057\trunk\production_files\400589_pick_and_place.csv
+
+========================================================================================================================
+File Design Information:
+
+Date:       21.10.21
+Time:       17:01
+Revision:   22155
+Variant:    No variations
+Units used: mm
+
+"Designator","Comment","Layer","Footprint","Center-X(mm)","Center-Y(mm)","Rotation","Description"
+"Fid1","Fiducial mark","TopLayer","Fiducial","9.1440","9.1440","0","Fiducial Mark"
+"TP1","TP","TopLayer","TESTPAD-TH_-_0.5mm","0.0000","7.6200","90","Testpoint, through hole"
+"U1","nPM1100-CAAAC0","TopLayer","BGA25C40P5X5_200X200X50","5.0958","4.5798","0","Li-Ion/Li-Polymer USB battery charger with a high efficiency buck regulator"
+"TP2","TP","TopLayer","TESTPAD-TH_-_0.5mm","0.0000","5.0800","90","Testpoint, through hole"
+"TP3","TP","TopLayer","TESTPAD-TH_-_0.5mm","2.5400","10.1600","0","Testpoint, through hole"
+"TP4","TP","TopLayer","TESTPAD-TH_-_0.5mm","5.0800","10.1600","0","Testpoint, through hole"
+"TP5","TP","TopLayer","TESTPAD-TH_-_0.5mm","2.5400","0.0000","0","Testpoint, through hole"
+"TP7","TP","TopLayer","TESTPAD-TH_-_0.5mm","10.1600","5.0800","270","Testpoint, through hole"
+"TP6","TP","TopLayer","TESTPAD-TH_-_0.5mm","5.0800","0.0000","0","Testpoint, through hole"
+"TP8","TP","TopLayer","TESTPAD-TH_-_0.5mm","7.6200","0.0000","0","Testpoint, through hole"
+"TP9","TP","TopLayer","TESTPAD-TH_-_0.5mm","10.1600","2.5400","90","Testpoint, through hole"
+"C1","2.2µF","TopLayer","CAPC1608X06L","2.8956","6.6294","270","Capacitor, Ceramic, X5R, ±10%, 25V"
+"C5","10µF","TopLayer","CAPC1608X06L","5.4958","6.5020","180","CAP CER 10UF 10V X7T 0603"
+"L1","2.2µH","TopLayer","INDC1608X06L","6.9596","7.6200","0","FIXED IND 2.2UH 500MA 520 MOHM"
+"C4","10µF","TopLayer","CAPC1608X06L","2.8956","4.1656","90","CAP CER 10UF 10V X7T 0603"
+"C3","10µF","TopLayer","CAPC1608X06L","7.2898","5.8166","270","CAP CER 10UF 10V X7T 0603"
+"TP10","TP","TopLayer","TESTPAD-TH_-_0.5mm","10.1600","7.6200","90","Testpoint, through hole"
+"R2","0R","TopLayer","RESC0603X03L_C","4.6990","2.9210","90","Resistor, ±5%, 0.05W"

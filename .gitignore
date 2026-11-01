@@ -1,0 +1,22 @@
+# EDA backup directories, at any depth.
+_backup/
+*_backup/
+
+# Local review renders, extracted Gerbers, and scratch scripts.
+/tmp/
+
+# Local whole-project copy; keep design and manufacturing archives tracked.
+/CadenceSensor_copy.zip
+
+# EDA SQLite sidecars and editor/Office lock files.
+*.eprj2-wal
+*.eprj2-shm
+*.eprj2-journal
+~$*
+*.swp
+*.swo
+
+# OS metadata.
+Thumbs.db
+Desktop.ini
+.DS_Store

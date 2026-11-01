@@ -1,0 +1,112 @@
+CadenceSensor 原理图审阅（2026-11-01）
+
+结论：本版仍有一处必须修改的MCU去耦电容取值错误，以及尚未闭环的电磁蜂鸣器
+关断保护问题。建议完成这两项后再投板。其余核心供电、接口、传感器和桥路未发现
+新的同等级明确图面连接错误。
+
+审阅范围：Hardware/原理图/Schematic1下文件名为2026-11-01的全部4页SVG。
+逐页渲染检查，并对照Nordic QFAA参考电路、nPM1100手册及AO3400A资料。
+不将历史审阅结果或已修改说明当作当前图纸的通过证明。
+当前未执行原始EDA的ERC、PCB DRC、完整封装映射检查或上电实测，未修改原图。
+固定10kΩ温度等效电阻按用户既定需求保留，不列作问题。
+
+一、优先修改
+
+1. [P1：明确取值错误] 第2页C20接DEC1，但标为100pF。
+   当前：U3 pin1/DEC1 -> C20 100pF -> GND。
+   正确：该位置应使用100nF，即0.1µF；本版标值小了1000倍。
+   DEC1是片内稳压节点，去耦不足可能造成启动、运行或负载切换不稳定。
+   修改：C20改100nF，建议按Nordic参考选X7R并靠近DEC1落地。
+   同时同步BOM与PCB器件属性，不仅修改图纸文字。
+   不要把DEC3的100pF也改成100nF：本版C13接DEC3，100pF是正确值。
+   依据：nRF52832 QFAA DC/DC参考电路，DEC1对应100nF去耦；本地产品规范53.2。
+
+2. [P1：负载保护待补齐] 第2页MLT-5020仍无外部续流或钳位。
+   当前Q3已经换AO3400A，源漏方向正确，栅极由P0.23经100Ω驱动。
+   但电磁无源蜂鸣器关断时仍会产生漏极尖峰。AO3400A额定VDS为30V；
+   低导通电阻和正确源漏方向并不能代替负载关断保护。
+   MOSFET体二极管由GND朝漏极方向，不负责钳位此类正向漏极尖峰。
+   修改：按实际蜂鸣器的参考驱动增加续流/钳位，并检查峰值电流及吸能条件。
+   简单接法：二极管阴极K接VOUT、阳极A接蜂鸣器负端/Q3漏极；正向电流覆盖线圈电流。
+   若采用其他钳位，应核算电压、能量和器件余量，并验证声压及衰减速度。
+   不能把未验证的反复雪崩当成既定保护方案。
+   MLT-5020应以合适PWM驱动；锁定采购厂家/版本，避免用长期直流置高作为工作方式。
+
+二、本版已修正并核对的项目
+
+  - SW4与C19上端已接P0.21，与MCU RESET和H3复位线同名；下端接GND。
+    SW4只使用1/2常开脚，3/4不再跨接RESET和地；此前两个复位接线问题均已解除。
+  - P0.21硬件复位仍须配置UICR.PSELRESET；C19=100nF可保留。
+  - POWER_OFF接U3 P0.22，不依赖P0.09/P0.10的NFC复用。
+  - SHPHLD未接MCU，保留R25=100kΩ上拉VBAT、SW3拉地；支持独立按键唤醒。
+  - POWER_OFF经R8=1kΩ进BAS116阳极，阴极接SHPACT；R9=100kΩ在GPIO侧下拉。
+    SW2把SHPACT拉至VBAT时二极管反偏，未见新的VBAT直灌GPIO路径。
+  - SHPACT的R24=500kΩ下拉保留；按键/GPIO关机时应满足无VBUS及至少200ms门限。
+  - Q3 AO3400A有2.5V栅压下RDS(on)保证，选型比原2N7002更适合3V GPIO驱动。
+  - 蜂鸣器独立改用P0.23；此前与LED共用P0.12的联动已解除。
+  - 常亮LED7及受控LED8在本页已移除；SW5是P0.11经R13=1kΩ到地的用户按键。
+
+三、当前电容分配（按本版编号，不沿用旧图编号）
+
+  C20：DEC1，当前100pF错误，应改100nF。
+  C13：DEC3，100pF正确。
+  U3 pin32/DEC2：留空，符合QFAA参考，不按WLCSP方案额外补电容。
+  C21：DEC4，1µF正确。
+  C18：VDD支路，4.7µF正确。
+  C14、C16：VDD去耦，各100nF正确。
+  C15、C23：32MHz晶振负载，各12pF，最终值仍需实际晶振CL/寄生参数核算。
+  C10、C12：32.768kHz晶振负载，各12pF，同样需实际晶振规格核算。
+  C19：RESET对地100nF，不是VOUT并联电容。
+  C17：RF匹配0.8pF，标称与参考一致，实际布局与天线匹配仍需验证。
+
+VOUT直接并联电容：C8=10µF、C18=4.7µF，C1/C3/C4/C5/C14/C16各100nF，
+总标称约15.3µF。DEC与RESET电容不直接并入这个总量。
+nPM1100要求输出总有效电容为6~20µF，最终BOM需核算直流偏压、容差和温度。
+
+四、各模块复查
+
+电源与USB：
+  nPM1100 pin1接电感后的VOUT，pin22 SW经L2=2.2µH到VOUT，DEC有C6=10µF。
+  pin2/3接DEC，高/高对应3.0V；pin4/23/25接地，连接成立。
+  库文字仍需改：pin3是VOUTBSET0，不是VOUTBSET2；pin4是AVSS，不是NC。
+  必须把文字、电气类型和PCB焊盘映射统一，不能靠错误NC类型绕过检查。
+  R11=30kΩ对应标称20mA充电，VTERMSET高为标准版本4.2V目标。
+  R12=10kΩ按固定方案保留；CHG/ERR驱动LED的连接未见新问题。
+  USB两路CC分别5.1kΩ下拉，D+/D-合并到PMIC；图面未见VBUS与GND新增短接。
+  ISET/MODE上电与复位期间的确定电平仍需确认，必要时预留外部下拉。
+
+MCU/RF：
+  VDD pin13/36/48接VOUT，VSS/裸露焊盘接地；DCC电感链、DEC4回路拓扑成立。
+  除C20外，晶振、SWD、SPI/I²C GPIO及RF匹配未见新的明确图面误连。
+  晶振、天线和RF器件未给出完整物料/PCB，不能仅凭标称值确认BLE射频性能。
+
+SC7A20H：
+  VDD/VDDIO及100nF去耦、GND/GNDIO、pin4接地、CS/SDO拉高、4.7kΩ上拉正确。
+  地址0x19，INT1到P0.13；INT2未接MCU不影响使用INT1。
+
+ADS1220及电桥：
+  ADS_SCK经R18到pin1，ADS_CS经R19到pin2，MOSI/MISO/DRDY对应连接正确。
+  AVDD/DVDD同源3V并各100nF去耦，CLK接地，AVSS/DGND接地。
+  AIN0经R23接固定桥臂中点，AIN1经R22接应变片桥臂中点，半桥拓扑正确。
+  两个350Ω固定桥臂应补充精度/温漂和实际料号，避免高增益时零点占用范围过大。
+  两路1kΩ及跨输入100nF配置合理；外部参考脚未接源时固件不能选择这些脚作参考。
+
+电池采样：
+  Q1控制分压拓扑成立，R6=1.5MΩ、R7=220kΩ，4.2V电池约对应0.537V采样值。
+  源阻抗约192kΩ，SAADC建议20µs或更长采集时间，使能后等待稳定再采样。
+
+五、待核实事项与验收
+
+  - L2实际型号的饱和/允许电流至少350mA，DCR不大于400mΩ。
+  - 蜂鸣器与无线/电桥同时运行时的峰值负载，不应超出Buck 150mA供电能力。
+  - Q3栅极串阻100Ω、下拉1MΩ不是本次主阻断项；可评估330Ω和100kΩ提升瞬态/抗扰余量。
+  - 完整BOM、封装引脚、晶振CL/ESR、RF参考布局及天线净空仍需逐项核实。
+  - 在原始EDA中跑ERC，并高亮VBUS/GND、DEC1、RESET、SHPACT和POWER_OFF网络。
+  - 修正后限流上电，验证SWD/复位、I²C身份、SPI回读、桥路零点和蜂鸣器漏极波形。
+  - 测试按键/GPIO关机、按键/USB唤醒以及Ship电流；不能用静态SVG审阅代替功能实测。
+
+主要依据：
+https://docs.nordicsemi.com/r/bundle/ps_nrf52832/page/ref_circuitry.html
+https://www.aosmd.com/sites/default/files/res/datasheets/AO3400A.pdf
+https://docs.nordicsemi.com/r/bundle/ps_npm1100/page/chapters/pin.html
+https://docs.nordicsemi.com/r/bundle/ps_npm1100/page/chapters/core_components/buck/doc/frontpage.html

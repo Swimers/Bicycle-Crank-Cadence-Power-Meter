@@ -1,0 +1,110 @@
+CadenceSensor 最新原理图复审（2026-10-30，4页版）
+
+结论：关机隔离电路已按建议实现，SPI与VOUT电容修正仍保留。
+新增的RESET按键接线、蜂鸣器Q2方向需要先修正/按实际引脚确认；
+POWER_OFF选择了P0.09，另有NFC复用配置要求，不能直接视为普通GPIO。
+当前尚不能认定投板条件已全部满足。
+
+范围：Doc/Schematic1下当前4份SVG，全部渲染审阅；
+对SW4内部连线、Q2符号、D1方向和相关外部导线检查SVG几何结构。
+未取得原始EDA工程、网络表、PCB或完整BOM，未执行ERC/DRC或上电实测。
+固定10kΩ电阻按用户需求保留，不作为待修改问题。
+本报告未修改原始SVG。
+
+一、优先修正
+
+1. 第2页 SW4：当前符号的3、4脚永久相连，却跨接RESET和GND。
+   外部连线把SW4 pin1/pin4接P0.21，pin2/pin3接GND。
+   但此TS24CA符号内部是pin1与pin2之间的常开触点，以及pin3/pin4之间的直连。
+   SVG中的内部直线连接上下两个3/4引脚，没有第二个常开触点。
+   按该符号定义，P0.21通过pin4 -> pin3一直连接GND，按键未按也成立。
+   启用UICR.PSELRESET后，会使MCU持续处于复位；未启用时则RESET按键功能不正确。
+   必须与实际采购TS24CA的引脚/壳体连接定义核对，不能套用另一类四脚按键的共端关系。
+   建议最小接法：仅pin1接P0.21、pin2接GND；断开pin3/4原来的外部连线，
+   它们按实际器件壳体/固定脚要求处理，不能一个接RESET、另一个接GND。
+   C13继续跨接P0.21与GND。
+   实物断电检查：松开时RESET-GND不应为直流短路，按下后才导通。
+   如果符号内部直线本身画错，则应修库，并重新核对焊盘映射。
+
+2. 第2页 Q2：按当前符号，源漏接反。
+   符号中与体端/源极连接的上端接BUZZER1负端，另一端接GND；
+   体二极管显示为从蜂鸣器负端朝GND正向导通。
+   因此即使GPIO为低，蜂鸣器也可能经体二极管持续取得电流，失去可靠关断。
+   正确的N沟道低边驱动必须为：
+       VOUT -> 蜂鸣器正端；蜂鸣器负端 -> Q2漏极D；Q2源极S -> GND。
+       MCU GPIO -> R28 100Ω -> Q2栅极G；下拉保留。
+   Nexperia 2N7002,215的SOT23引脚定义是1=G、2=S、3=D。
+   因此必须确认实际网络为pin2=GND、pin3=蜂鸣器负端、pin1=栅极驱动。
+   当前SVG隐藏了Q2引脚编号；请在EDA中显示G/S/D与编号再核对。
+   如果实际编号已经满足上述定义，则应修正符号图形，不能保留图形与引脚语义冲突。
+
+二、关机电路核对结果
+
+第1页：
+  VBAT -> R25 100kΩ -> SHPHLD -> SW3 -> GND，没有再接到MCU，符合开机按键方案。
+  VBAT -> SW2 -> SHPACT，R24 500kΩ将SHPACT拉低。
+  POWER_OFF -> R8 1kΩ -> BAS116阳极A；阴极K -> SHPACT。
+  R9 100kΩ位于POWER_OFF一侧到GND；BAS116另一NC端留空。
+  二极管方向正确，按SW2时它反偏，切断VBAT到MCU的直接通路。
+  此隔离拓扑支持按键关机与GPIO关机，并保留独立按键开机。
+  BAS116实际焊盘必须为1=A、3=K、2=NC，SVG未显示编号，投板前须核对。
+
+第2页：POWER_OFF实际接在P0.09（U3 pin11），并不是此前示例的P0.22。
+  这不是电压误接，但P0.09默认属于NFC功能，启用普通GPIO输出必须配置
+  UICR.NFCPINS，配置经复位生效。否则软件直接设置GPIO仍不能完成关机控制。
+  建议将POWER_OFF改到空闲P0.22，或在固件烧录/启动流程中明确配置并验证NFCPINS。
+  如改到P0.22，要同步移除P0.22原来的网络标签，避免同一管脚出现歧义。
+
+动作条件：
+  正常运行POWER_OFF输出低；自动关机完成必要保存后输出高，保持到MCU失电。
+  无USB且SHPHLD保持高时，SHPACT高至少200ms才进入Ship Mode。
+  SW2按住超过200ms可硬件关机；松开SW2后，SW3拉低SHPHLD至少200ms可开机。
+  VBUS必须已降到规定阈值以下；USB插入会唤醒，USB供电时不能依靠Ship切断系统。
+
+三、新增蜂鸣器的待定参数
+
+BUZZER1仅写4kHz，没有完整料号；图中还有一个未连接的无标号引脚。
+目前无法确认它是有源蜂鸣器、无源压电器件还是电磁式器件，不能验证第三脚用途、
+3V是否为额定工作电压，以及所需电流与驱动方式。
+  - 有源器件通常用直流开关控制，无源器件需要合适频率的PWM。
+  - 电磁负载需按厂家要求补续流/钳位；普通续流二极管阴极接VOUT、阳极接漏极。
+  - 压电负载应按其参考电路检查放电路径与驱动，不应无条件套用电磁负载续流方案。
+  - 2N7002的阈值电压不能作为3V下充分导通的保证；需结合实际负载电流核算，
+    更稳妥的是选有2.5V或更低栅压导通电阻保证的MOSFET。
+  - 蜂鸣器与LED8目前均使用P0.12，动作会联动；若需要独立控制，改用两个GPIO。
+    若联动是预期功能，则此项不构成错误。
+
+四、其余模块复核
+
+  - ADS1220 SPI：ADS_SCK -> R18 -> pin1，ADS_CS -> R19 -> pin2，正确。
+    MOSI->pin16、MISO<-pin15、DRDY<-pin14、内部时钟及供电连接维持正确。
+    AIN0/AIN1到半桥的连接及1kΩ/100nF差分滤波未发现新的图面错误。
+  - SC7A20H：VDD/VDDIO、地、pin4接地、CS/SDO拉高、0x19地址、I²C上拉
+    与INT1连接未发现新的图面错误。
+  - nRF52832：核心供电、DEC去耦、DCC电感链、两组晶振和SWD维持此前拓扑。
+    P0.21复位功能仍需UICR.PSELRESET配置；SW1需输入上拉。
+  - VOUT直接并联电容仍为约15.3µF标称，未恢复47µF；实际有效值须满足6~20µF。
+  - USB CC、D+/D-及PMIC主要电源节点、Q1电池分压未发现新增图面误连。
+    电池分压源阻抗约192kΩ，SAADC采集时间建议20µs或更长并等待开关稳定。
+  - U2的库文字仍有旧错误：pin3应是VOUTBSET0，pin4应是AVSS。
+    当前实体连接是pin2/3接DEC、pin4/23/25接地；文字、电气类型、焊盘均应统一。
+  - LED7常亮、电桥约8.57mA连续激励仍存在，属于续航取舍，未作为新增接线错误。
+
+五、最低验收
+
+显示SW4、D1、Q2的实际焊盘编号，在原始EDA中运行ERC并高亮RESET、GND、
+POWER_OFF、SHPACT、SHPHLD；符号内部的金属共端可能不会被普通ERC自动识别。
+断电验证RESET松开不短路；限流上电验证SWD/复位、蜂鸣器关闭电流、ADC和I²C。
+最后分别实测SW2关机、GPIO关机、SW3唤醒、USB唤醒以及Ship电流。
+本报告是静态审阅，不代表上述功能已经实测通过。
+
+官方/厂家依据：
+Nexperia BAS116：
+https://assets.nexperia.com/documents/data-sheet/BAS116.pdf
+Nexperia 2N7002：
+https://assets.nexperia.com/documents/data-sheet/2N7002.pdf
+Nordic nRF52832 NFC引脚复用：
+https://docs.nordicsemi.com/r/bundle/ps_nrf52832/page/nfc.html
+Nordic nPM1100 Ship Mode：
+https://docs.nordicsemi.com/r/bundle/ps_npm1100/page/product_overview.html
+SW4短接判断以本次SVG所绘符号和外部连线为依据；具体采购版本引脚需以实际器件核实。

@@ -1,0 +1,19 @@
+* text=auto
+
+*.md text eol=lf
+*.svg text eol=lf
+*.tel text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+LICENSE text eol=lf
+
+*.eprj2 binary
+*.epro2 binary
+*.pdf binary
+*.zip binary
+*.xlsx binary
+*.xls binary
+*.png binary
+*.PcbDoc binary
+*.SchDoc binary
+*.IntLib binary
