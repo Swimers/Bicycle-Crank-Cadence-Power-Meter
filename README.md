@@ -1,4 +1,4 @@
-# CadenceSensor
+# Bicycle Crank Cadence Power Meter
 
 基于 **nRF52832 + SC7A20H + ADS1220 + nPM1100** 的公路车踏频与曲柄功率计硬件原型项目。
 
