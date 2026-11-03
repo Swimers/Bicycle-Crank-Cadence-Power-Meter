@@ -1,0 +1,7 @@
+description: SC7A20H raw I2C endpoint (no Zephyr sensor driver instantiated)
+compatible: "silan,sc7a20h"
+include: i2c-device.yaml
+properties:
+  int1-gpios:
+    type: phandle-array
+    required: true

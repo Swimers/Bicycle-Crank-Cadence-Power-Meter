@@ -1,0 +1,8 @@
+{
+    "nrf-connect.applications": [
+        "${workspaceFolder}\\Software\\nRF52832_DemoBoard"
+    ],
+    "nrf-connect.boardRoots": [
+        "${workspaceFolder}/Software/nRF52832_DemoBoard"
+    ]
+}

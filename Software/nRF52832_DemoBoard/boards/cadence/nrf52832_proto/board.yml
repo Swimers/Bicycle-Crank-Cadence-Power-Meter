@@ -1,0 +1,6 @@
+board:
+  name: nrf52832_proto
+  full_name: NRF52832 3.3V Header Prototype
+  vendor: others
+  socs:
+    - name: nrf52832

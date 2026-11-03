@@ -1,0 +1,7 @@
+description: ADS1220 raw SPI endpoint (application owns register protocol)
+compatible: "cadence,ads1220-raw"
+include: spi-device.yaml
+properties:
+  drdy-gpios:
+    type: phandle-array
+    required: true
