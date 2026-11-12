@@ -1,0 +1,15 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/cmake_install.cmake",
+		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/cmake_install.cmake",
+		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/cmake_install.cmake",
+		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/bootloader/cmake_install.cmake",
+		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/firmware_loader/cmake_install.cmake",
+		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/modules/nrf/cmake_install.cmake",
+		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/modules/mcuboot/cmake_install.cmake",
+		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/boards/cmake_install.cmake",
+		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/soc/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

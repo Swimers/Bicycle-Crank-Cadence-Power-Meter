@@ -1,0 +1,57 @@
+cmake:
+  application:
+    configuration-dir: 'D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo'
+    source-dir: 'D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo'
+  board:
+    name: 'nrf52dk'
+    path:
+     - 'D:/ncs/v3.4.1/zephyr/boards/nordic/nrf52dk'
+    qualifiers: 'nrf52832'
+    revision: ''
+  devicetree:
+    bindings-dirs:
+     - 'D:/ncs/v3.4.1/nrf/dts/bindings'
+     - 'D:/ncs/v3.4.1/zephyr/dts/bindings'
+    files:
+     - 'D:/ncs/v3.4.1/zephyr/boards/nordic/nrf52dk/nrf52dk_nrf52832.dts'
+     - 'D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/app.overlay'
+    include-dirs:
+     - 'D:/ncs/v3.4.1/nrf/include'
+     - 'D:/ncs/v3.4.1/nrf/dts/common'
+     - 'D:/ncs/v3.4.1/nrf/dts/riscv'
+     - 'D:/ncs/v3.4.1/nrf/dts/arm'
+     - 'D:/ncs/v3.4.1/nrf/dts'
+     - 'D:/ncs/v3.4.1/zephyr/include'
+     - 'D:/ncs/v3.4.1/zephyr/include/zephyr'
+     - 'D:/ncs/v3.4.1/zephyr/dts/common'
+     - 'D:/ncs/v3.4.1/zephyr/dts/vendor'
+     - 'D:/ncs/v3.4.1/zephyr/dts/rx'
+     - 'D:/ncs/v3.4.1/zephyr/dts/x86'
+     - 'D:/ncs/v3.4.1/zephyr/dts/xtensa'
+     - 'D:/ncs/v3.4.1/zephyr/dts/sparc'
+     - 'D:/ncs/v3.4.1/zephyr/dts/riscv'
+     - 'D:/ncs/v3.4.1/zephyr/dts/posix'
+     - 'D:/ncs/v3.4.1/zephyr/dts/arm64'
+     - 'D:/ncs/v3.4.1/zephyr/dts/arm'
+     - 'D:/ncs/v3.4.1/zephyr/dts/arc'
+     - 'D:/ncs/v3.4.1/zephyr/dts'
+    user-files:
+     - 'D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/app.overlay'
+  kconfig:
+    files:
+     - 'D:/ncs/v3.4.1/zephyr/boards/nordic/nrf52dk/nrf52dk_nrf52832_defconfig'
+     - 'D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/prj.conf'
+     - 'D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/misc/generated/extra_kconfig_options.conf'
+     - 'D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/.config.sysbuild'
+    user-files:
+     - 'prj.conf'
+  toolchain:
+    name: 'zephyr'
+    path: 'C:/ncs/toolchains/4f5b6ad6dd/opt/zephyr-sdk'
+  vendor-specific:
+    nordic:
+      svdfile: 'D:/ncs/v3.4.1/modules/hal/nordic/nrfx/bsp/stable/mdk/nrf52.svd'
+  zephyr:
+    version: '4.4.2'
+    zephyr-base: 'D:/ncs/v3.4.1/zephyr'
+version: '0.1.0'

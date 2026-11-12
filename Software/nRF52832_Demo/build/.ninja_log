@@ -1,0 +1,27 @@
+# ninja log v7
+23	103	8161850840305612	_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-mkdir	68184b5e1f4338af
+23	103	8161850840305612	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-mkdir	68184b5e1f4338af
+104	439	8161850841076831	_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-download	570e8fe4fcc518ec
+104	439	8161850841076831	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-download	570e8fe4fcc518ec
+439	520	8161850844468019	_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-update	5fc39605b49f3c3e
+439	520	8161850844468019	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-update	5fc39605b49f3c3e
+520	593	8161850845182309	_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-patch	330730278ebaec61
+520	593	8161850845182309	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-patch	330730278ebaec61
+593	667	8161850845929941	_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-configure	1ce37ba1137751b2
+593	667	8161850845929941	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-configure	1ce37ba1137751b2
+667	35294	8161850846007111	_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-build	5a9036699761f9ed
+667	35294	8161850846007111	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-build	5a9036699761f9ed
+35294	35343	8161851192279503	_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-install	577054d4ffa0358
+35294	35343	8161851192279503	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-install	577054d4ffa0358
+35343	35441	8161851193671314	_sysbuild/sysbuild/images/CMakeFiles/nRF52832_Demo-complete	ba39ed1567517afd
+35343	35441	8161851193671314	_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-done	ba39ed1567517afd
+35343	35441	8161851193671314	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/CMakeFiles/nRF52832_Demo-complete	ba39ed1567517afd
+35343	35441	8161851193671314	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-done	ba39ed1567517afd
+15	3735	8161851637590470	_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-build	5a9036699761f9ed
+15	3735	8161851637590470	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-build	5a9036699761f9ed
+3735	3785	8161851674791528	_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-install	577054d4ffa0358
+3735	3785	8161851674791528	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-install	577054d4ffa0358
+3785	3879	8161851676172475	_sysbuild/sysbuild/images/CMakeFiles/nRF52832_Demo-complete	ba39ed1567517afd
+3785	3879	8161851676172475	_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-done	ba39ed1567517afd
+3785	3879	8161851676172475	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/CMakeFiles/nRF52832_Demo-complete	ba39ed1567517afd
+3785	3879	8161851676172475	D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/sysbuild/images/nRF52832_Demo-prefix/src/nRF52832_Demo-stamp/nRF52832_Demo-done	ba39ed1567517afd
