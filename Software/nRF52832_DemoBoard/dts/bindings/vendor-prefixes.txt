@@ -1,2 +1,0 @@
-cadence	CadenceSensor project local bindings
-silan	Silan Microelectronics
