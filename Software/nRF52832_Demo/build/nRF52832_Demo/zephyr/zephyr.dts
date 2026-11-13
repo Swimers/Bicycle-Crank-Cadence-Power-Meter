@@ -11,7 +11,6 @@
 	chosen {
 		zephyr,entropy = &rng;                       /* in zephyr\dts\arm\nordic\nrf52832.dtsi:15 */
 		zephyr,flash-controller = &flash_controller; /* in zephyr\dts\arm\nordic\nrf52832.dtsi:16 */
-		zephyr,console = &uart0;                     /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:19 */
 		zephyr,shell-uart = &uart0;                  /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:20 */
 		zephyr,uart-mcumgr = &uart0;                 /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:21 */
 		zephyr,bt-mon-uart = &uart0;                 /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:22 */
@@ -20,6 +19,7 @@
 		zephyr,flash = &flash0;                      /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:25 */
 		zephyr,code-partition = &slot0_partition;    /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:26 */
 		zephyr,bt-hci = &bt_hci_sdc;                 /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:6 */
+		zephyr,console = &uart0;                     /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:7 */
 	};
 
 	/* node '/aliases' defined in zephyr\dts\common\skeleton.dtsi:15 */
@@ -149,32 +149,32 @@
 			reg = < 0x40001000 0x1000 >;     /* in zephyr\dts\arm\nordic\nrf52832.dtsi:119 */
 			interrupts = < 0x1 0x1 >;        /* in zephyr\dts\arm\nordic\nrf52832.dtsi:120 */
 			ble-2mbps-supported;             /* in zephyr\dts\arm\nordic\nrf52832.dtsi:122 */
-			status = "okay";                 /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:12 */
+			status = "okay";                 /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:13 */
 
 			/* node '/soc/radio@40001000/bt_hci_sdc' defined in zephyr\dts\arm\nordic\nrf52832.dtsi:124 */
 			bt_hci_sdc: bt_hci_sdc {
 				compatible = "nordic,bt-hci-sdc"; /* in zephyr\dts\arm\nordic\nrf52832.dtsi:125 */
-				status = "okay";                  /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:16 */
+				status = "okay";                  /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:17 */
 			};
 
 			/* node '/soc/radio@40001000/bt_hci_controller' defined in zephyr\dts\arm\nordic\nrf52832.dtsi:128 */
 			bt_hci_controller: bt_hci_controller {
 				compatible = "zephyr,bt-hci-ll-sw-split"; /* in zephyr\dts\arm\nordic\nrf52832.dtsi:129 */
-				status = "disabled";                      /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:20 */
+				status = "disabled";                      /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:21 */
 			};
 		};
 
 		/* node '/soc/uart@40002000' defined in zephyr\dts\arm\nordic\nrf52832.dtsi:134 */
 		uart0: arduino_serial: uart@40002000 {
-			reg = < 0x40002000 0x1000 >;     /* in zephyr\dts\arm\nordic\nrf52832.dtsi:138 */
-			interrupts = < 0x2 0x1 >;        /* in zephyr\dts\arm\nordic\nrf52832.dtsi:139 */
-			status = "okay";                 /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:171 */
-			compatible = "nordic,nrf-uarte"; /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:172 */
-			current-speed = < 0x1c200 >;     /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:173 */
-			pinctrl-0 = < &uart0_default >;  /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:174 */
-			pinctrl-1 = < &uart0_sleep >;    /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:175 */
+			reg = < 0x40002000 0x1000 >;            /* in zephyr\dts\arm\nordic\nrf52832.dtsi:138 */
+			interrupts = < 0x2 0x1 >;               /* in zephyr\dts\arm\nordic\nrf52832.dtsi:139 */
+			compatible = "nordic,nrf-uarte";        /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:71 */
+			status = "okay";                        /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:72 */
+			current-speed = < 0x1c200 >;            /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:73 */
+			pinctrl-0 = < &cadence_uart0_default >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:75 */
+			pinctrl-1 = < &cadence_uart0_sleep >;   /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:76 */
 			pinctrl-names = "default",
-			                "sleep";         /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:176 */
+			                "sleep";                /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:77 */
 		};
 
 		/* node '/soc/i2c@40003000' defined in zephyr\dts\arm\nordic\nrf52832.dtsi:143 */
@@ -185,13 +185,13 @@
 			interrupts = < 0x3 0x1 >;              /* in zephyr\dts\arm\nordic\nrf52832.dtsi:155 */
 			easydma-maxcnt-bits = < 0x8 >;         /* in zephyr\dts\arm\nordic\nrf52832.dtsi:156 */
 			zephyr,pm-device-runtime-auto;         /* in zephyr\dts\arm\nordic\nrf52832.dtsi:158 */
-			compatible = "nordic,nrf-twim";        /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:50 */
-			status = "okay";                       /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:51 */
-			clock-frequency = < 0x186a0 >;         /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:52 */
-			pinctrl-0 = < &cadence_i2c0_default >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:53 */
-			pinctrl-1 = < &cadence_i2c0_sleep >;   /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:54 */
+			compatible = "nordic,nrf-twim";        /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:81 */
+			status = "okay";                       /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:82 */
+			clock-frequency = < 0x186a0 >;         /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:83 */
+			pinctrl-0 = < &cadence_i2c0_default >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:84 */
+			pinctrl-1 = < &cadence_i2c0_sleep >;   /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:85 */
 			pinctrl-names = "default",
-			                "sleep";               /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:55 */
+			                "sleep";               /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:86 */
 		};
 
 		/* node '/soc/spi@40003000' defined in zephyr\dts\arm\nordic\nrf52832.dtsi:161 */
@@ -207,7 +207,7 @@
 			pinctrl-1 = < &spi0_sleep >;   /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:208 */
 			pinctrl-names = "default",
 			                "sleep";       /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:209 */
-			status = "disabled";           /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:60 */
+			status = "disabled";           /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:91 */
 		};
 
 		/* node '/soc/i2c@40004000' defined in zephyr\dts\arm\nordic\nrf52832.dtsi:179 */
@@ -579,12 +579,12 @@
 			max-frequency = < 0x7a1200 >;            /* in zephyr\dts\arm\nordic\nrf52832.dtsi:478 */
 			easydma-maxcnt-bits = < 0x8 >;           /* in zephyr\dts\arm\nordic\nrf52832.dtsi:479 */
 			compatible = "nordic,nrf-spi";           /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:221 */
-			status = "okay";                         /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:222 */
 			cs-gpios = < &arduino_header 0x10 0x1 >; /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:223 */
 			pinctrl-0 = < &spi2_default >;           /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:224 */
 			pinctrl-1 = < &spi2_sleep >;             /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:225 */
 			pinctrl-names = "default",
 			                "sleep";                 /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:226 */
+			status = "disabled";                     /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:96 */
 		};
 
 		/* node '/soc/rtc@40024000' defined in zephyr\dts\arm\nordic\nrf52832.dtsi:483 */
@@ -627,7 +627,6 @@
 
 		/* node '/pin-controller/uart0_default' defined in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832-pinctrl.dtsi:7 */
 		uart0_default: uart0_default {
-			phandle = < 0x2 >; /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:174 */
 
 			/* node '/pin-controller/uart0_default/group1' defined in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832-pinctrl.dtsi:8 */
 			group1 {
@@ -640,7 +639,6 @@
 
 		/* node '/pin-controller/uart0_sleep' defined in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832-pinctrl.dtsi:16 */
 		uart0_sleep: uart0_sleep {
-			phandle = < 0x3 >; /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:175 */
 
 			/* node '/pin-controller/uart0_sleep/group1' defined in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832-pinctrl.dtsi:17 */
 			group1 {
@@ -800,26 +798,55 @@
 			};
 		};
 
-		/* node '/pin-controller/cadence_i2c0_default' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:33 */
-		cadence_i2c0_default: cadence_i2c0_default {
-			phandle = < 0x4 >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:53 */
+		/* node '/pin-controller/cadence_uart0_default' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:34 */
+		cadence_uart0_default: cadence_uart0_default {
+			phandle = < 0x2 >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:75 */
 
-			/* node '/pin-controller/cadence_i2c0_default/group1' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:34 */
+			/* node '/pin-controller/cadence_uart0_default/group1' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:35 */
 			group1 {
-				psels = < 0xb00000f >,
-				        < 0xc00000e >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:35 */
+				psels = < 0x19 >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:36 */
+			};
+
+			/* node '/pin-controller/cadence_uart0_default/group2' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:39 */
+			group2 {
+				psels = < 0x100001a >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:40 */
+				bias-pull-up;          /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:41 */
 			};
 		};
 
-		/* node '/pin-controller/cadence_i2c0_sleep' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:40 */
-		cadence_i2c0_sleep: cadence_i2c0_sleep {
-			phandle = < 0x5 >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:54 */
+		/* node '/pin-controller/cadence_uart0_sleep' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:45 */
+		cadence_uart0_sleep: cadence_uart0_sleep {
+			phandle = < 0x3 >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:76 */
 
-			/* node '/pin-controller/cadence_i2c0_sleep/group1' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:41 */
+			/* node '/pin-controller/cadence_uart0_sleep/group1' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:46 */
+			group1 {
+				psels = < 0x19 >,
+				        < 0x100001a >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:47 */
+				low-power-enable;      /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:49 */
+				bias-pull-up;          /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:50 */
+			};
+		};
+
+		/* node '/pin-controller/cadence_i2c0_default' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:54 */
+		cadence_i2c0_default: cadence_i2c0_default {
+			phandle = < 0x4 >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:84 */
+
+			/* node '/pin-controller/cadence_i2c0_default/group1' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:55 */
 			group1 {
 				psels = < 0xb00000f >,
-				        < 0xc00000e >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:42 */
-				low-power-enable;      /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:44 */
+				        < 0xc00000e >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:56 */
+			};
+		};
+
+		/* node '/pin-controller/cadence_i2c0_sleep' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:61 */
+		cadence_i2c0_sleep: cadence_i2c0_sleep {
+			phandle = < 0x5 >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:85 */
+
+			/* node '/pin-controller/cadence_i2c0_sleep/group1' defined in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:62 */
+			group1 {
+				psels = < 0xb00000f >,
+				        < 0xc00000e >; /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:63 */
+				low-power-enable;      /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:65 */
 			};
 		};
 	};
@@ -928,7 +955,7 @@
 			gpios = < &gpio0 0xe 0x11 >;    /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:71 */
 			label = "Push button switch 1"; /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:72 */
 			zephyr,code = < 0x2 >;          /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:73 */
-			status = "disabled";            /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:25 */
+			status = "disabled";            /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:26 */
 		};
 
 		/* node '/buttons/button_2' defined in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:76 */
@@ -936,7 +963,7 @@
 			gpios = < &gpio0 0xf 0x11 >;    /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:77 */
 			label = "Push button switch 2"; /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:78 */
 			zephyr,code = < 0x3 >;          /* in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:79 */
-			status = "disabled";            /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:29 */
+			status = "disabled";            /* in ..\..\Documents\GitHub\CadenceSensor\Software\nRF52832_Demo\app.overlay:30 */
 		};
 
 		/* node '/buttons/button_3' defined in zephyr\boards\nordic\nrf52dk\nrf52dk_nrf52832.dts:82 */

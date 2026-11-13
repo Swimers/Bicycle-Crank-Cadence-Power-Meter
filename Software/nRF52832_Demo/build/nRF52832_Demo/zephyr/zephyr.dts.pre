@@ -1056,6 +1056,7 @@ arduino_spi: &spi2 {
 / {
  chosen {
   zephyr,bt-hci = &bt_hci_sdc;
+  zephyr,console = &uart0;
  };
 };
 
@@ -1082,6 +1083,26 @@ arduino_spi: &spi2 {
 };
 
 &pinctrl {
+ cadence_uart0_default: cadence_uart0_default {
+  group1 {
+   psels = <((((((0) * 32U) + (25)) & 0x1FFU) << 0U) | ((0U & 0xFFU) << 24U))>;
+  };
+
+  group2 {
+   psels = <((((((0) * 32U) + (26)) & 0x1FFU) << 0U) | ((1U & 0xFFU) << 24U))>;
+   bias-pull-up;
+  };
+ };
+
+ cadence_uart0_sleep: cadence_uart0_sleep {
+  group1 {
+   psels = <((((((0) * 32U) + (25)) & 0x1FFU) << 0U) | ((0U & 0xFFU) << 24U))>,
+    <((((((0) * 32U) + (26)) & 0x1FFU) << 0U) | ((1U & 0xFFU) << 24U))>;
+   low-power-enable;
+   bias-pull-up;
+  };
+ };
+
  cadence_i2c0_default: cadence_i2c0_default {
   group1 {
    psels = <((((((0) * 32U) + (15)) & 0x1FFU) << 0U) | ((11U & 0xFFU) << 24U))>,
@@ -1098,6 +1119,16 @@ arduino_spi: &spi2 {
  };
 };
 
+&uart0 {
+ compatible = "nordic,nrf-uarte";
+ status = "okay";
+ current-speed = <115200>;
+ /delete-property/ hw-flow-control;
+ pinctrl-0 = <&cadence_uart0_default>;
+ pinctrl-1 = <&cadence_uart0_sleep>;
+ pinctrl-names = "default", "sleep";
+};
+
 &i2c0 {
  compatible = "nordic,nrf-twim";
  status = "okay";
@@ -1109,6 +1140,11 @@ arduino_spi: &spi2 {
 
 
 &spi0 {
+ status = "disabled";
+};
+
+
+&spi2 {
  status = "disabled";
 };
 # 0 "<command-line>" 2

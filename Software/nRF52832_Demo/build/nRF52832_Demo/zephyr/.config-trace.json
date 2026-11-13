@@ -6918,17 +6918,6 @@
     ]
   ],
   [
-    "CONFIG_HAS_HW_NRF_SPI2",
-    "n",
-    "bool",
-    "y",
-    "default",
-    [
-      "D:/ncs/v3.4.1/zephyr/soc/nordic\\common/Kconfig.peripherals",
-      191
-    ]
-  ],
-  [
     "CONFIG_HAS_HW_NRF_SWI0",
     "n",
     "bool",
