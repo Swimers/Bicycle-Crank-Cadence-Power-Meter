@@ -1056,7 +1056,14 @@ arduino_spi: &spi2 {
 / {
  chosen {
   zephyr,bt-hci = &bt_hci_sdc;
-  zephyr,console = &uart0;
+  zephyr,console = &bt_console;
+ };
+
+
+ bt_console: bt-console {
+  compatible = "zephyr,nus-uart";
+  tx-fifo-size = <2048>;
+  rx-fifo-size = <512>;
  };
 };
 

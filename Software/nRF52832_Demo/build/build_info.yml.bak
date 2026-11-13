@@ -1,4 +1,6 @@
 cmake:
+  application:
+    source-dir: 'D:/ncs/v3.4.1/zephyr/share/sysbuild'
   board:
     name: 'nrf52dk'
     path:
@@ -15,6 +17,7 @@ cmake:
      - 'D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/empty.conf'
     user-files:
      - 'D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/_sysbuild/empty.conf'
+  sysbuild: 'true'
 version: '0.1.0'
 west:
   command: 'C:\ncs\toolchains\4f5b6ad6dd\opt\bin\Scripts\west build --build-dir D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo --pristine --board nrf52dk/nrf52832 -- -DCONFIG_DEBUG_THREAD_INFO=y -DCONF_FILE=prj.conf'
