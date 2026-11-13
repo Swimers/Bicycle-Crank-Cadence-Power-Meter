@@ -440,6 +440,17 @@
     ]
   ],
   [
+    "CONFIG_DT_HAS_ZEPHYR_NUS_UART_ENABLED",
+    "n",
+    "bool",
+    "y",
+    "default",
+    [
+      "D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/Kconfig/Kconfig.dts",
+      16693
+    ]
+  ],
+  [
     "CONFIG_SENSOR",
     "y",
     "bool",
@@ -611,9 +622,11 @@
     "CONFIG_UART_INTERRUPT_DRIVEN",
     "y",
     "bool",
-    null,
-    "unset",
-    null
+    "y",
+    "select",
+    [
+      "UART_BT && BT_ZEPHYR_NUS && DT_HAS_ZEPHYR_NUS_UART_ENABLED && SERIAL"
+    ]
   ],
   [
     "CONFIG_GPIO_HOGS",
@@ -2556,9 +2569,34 @@
     "CONFIG_BT_ZEPHYR_NUS",
     "y",
     "bool",
-    null,
-    "unset",
-    null
+    "y",
+    "assign",
+    [
+      "D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/prj.conf",
+      16
+    ]
+  ],
+  [
+    "CONFIG_BT_ZEPHYR_NUS_DEFAULT_INSTANCE",
+    "y",
+    "bool",
+    "n",
+    "assign",
+    [
+      "D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/prj.conf",
+      17
+    ]
+  ],
+  [
+    "CONFIG_BT_ZEPHYR_NUS_AUTO_START_BLUETOOTH",
+    "y",
+    "bool",
+    "n",
+    "assign",
+    [
+      "D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/prj.conf",
+      18
+    ]
   ],
   [
     "CONFIG_BT_IAS",
@@ -9746,6 +9784,7 @@
     "y",
     "select",
     [
+      "UART_BT && BT_ZEPHYR_NUS && DT_HAS_ZEPHYR_NUS_UART_ENABLED && SERIAL",
       "UART_NRFX && (DT_HAS_NORDIC_NRF_UART_ENABLED || DT_HAS_NORDIC_NRF_UARTE_ENABLED) && SERIAL"
     ]
   ],
@@ -9809,6 +9848,39 @@
     null
   ],
   [
+    "CONFIG_UART_BT",
+    "y",
+    "bool",
+    "y",
+    "assign",
+    [
+      "D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/prj.conf",
+      19
+    ]
+  ],
+  [
+    "CONFIG_UART_BT_WORKQUEUE_PRIORITY",
+    "y",
+    "int",
+    "0",
+    "default",
+    [
+      "D:\\ncs\\v3.4.1\\zephyr\\drivers\\serial\\Kconfig.bt",
+      20
+    ]
+  ],
+  [
+    "CONFIG_UART_BT_WORKQUEUE_STACK_SIZE",
+    "y",
+    "int",
+    "1024",
+    "default",
+    [
+      "D:\\ncs\\v3.4.1\\zephyr\\drivers\\serial\\Kconfig.bt",
+      26
+    ]
+  ],
+  [
     "CONFIG_UART_NPCX_FIFO_EX",
     "y",
     "bool",
@@ -9839,14 +9911,6 @@
     ]
   ],
   [
-    "CONFIG_UART_NRFX_UARTE_NO_IRQ",
-    "y",
-    "bool",
-    null,
-    "unset",
-    null
-  ],
-  [
     "CONFIG_UART_NRFX_UARTE_ENHANCED_RX",
     "y",
     "bool",
@@ -9861,6 +9925,17 @@
     null,
     "unset",
     null
+  ],
+  [
+    "CONFIG_UART_0_INTERRUPT_DRIVEN",
+    "y",
+    "bool",
+    "y",
+    "default",
+    [
+      "D:\\ncs\\v3.4.1\\zephyr\\drivers\\serial\\Kconfig.nrfx_uart_instance",
+      9
+    ]
   ],
   [
     "CONFIG_UART_0_ENHANCED_POLL_OUT",
@@ -10892,7 +10967,8 @@
     "y",
     "select",
     [
-      "MULTITHREADING"
+      "MULTITHREADING",
+      "UART_BT && BT_ZEPHYR_NUS && DT_HAS_ZEPHYR_NUS_UART_ENABLED && SERIAL"
     ]
   ],
   [
@@ -13185,6 +13261,16 @@
     [
       "D:\\ncs\\v3.4.1\\zephyr\\Kconfig.zephyr",
       1110
+    ]
+  ],
+  [
+    "CONFIG_EXPERIMENTAL",
+    "n",
+    "bool",
+    "y",
+    "select",
+    [
+      "UART_BT && BT_ZEPHYR_NUS && DT_HAS_ZEPHYR_NUS_UART_ENABLED && SERIAL"
     ]
   ],
   [

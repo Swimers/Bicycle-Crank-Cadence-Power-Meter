@@ -65,6 +65,7 @@
 		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/common/cmake_install.cmake",
 		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/host/cmake_install.cmake",
 		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/services/cmake_install.cmake",
+		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/services/nus/cmake_install.cmake",
 		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/lib/cmake_install.cmake",
 		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/drivers/cmake_install.cmake",
 		"D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/drivers/disk/cmake_install.cmake",

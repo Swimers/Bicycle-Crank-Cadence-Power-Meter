@@ -176,6 +176,9 @@ D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zep
 D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/host/CMakeFiles/rebuild_cache.dir
 D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/services/CMakeFiles/edit_cache.dir
 D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/services/CMakeFiles/rebuild_cache.dir
+D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/services/nus/CMakeFiles/subsys__bluetooth__services__nus.dir
+D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/services/nus/CMakeFiles/edit_cache.dir
+D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/services/nus/CMakeFiles/rebuild_cache.dir
 D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/lib/CMakeFiles/edit_cache.dir
 D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/subsys/bluetooth/lib/CMakeFiles/rebuild_cache.dir
 D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/drivers/CMakeFiles/edit_cache.dir

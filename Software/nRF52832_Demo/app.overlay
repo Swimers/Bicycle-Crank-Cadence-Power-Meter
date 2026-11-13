@@ -4,7 +4,14 @@
 / {
 	chosen {
 		zephyr,bt-hci = &bt_hci_sdc;
-		zephyr,console = &uart0;
+		zephyr,console = &bt_console;
+	};
+
+	/* NUS GATT transport: no physical UART pins or baud rate required. */
+	bt_console: bt-console {
+		compatible = "zephyr,nus-uart";
+		tx-fifo-size = <2048>;
+		rx-fifo-size = <512>;
 	};
 };
 
