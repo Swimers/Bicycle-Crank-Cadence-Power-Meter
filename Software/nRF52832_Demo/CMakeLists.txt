@@ -5,6 +5,7 @@ project(nRF52832_Demo)
 
 target_sources(app PRIVATE
     src/main.c
+    src/bluetooth_app.c
     src/drivers/sc7a20h.c
     src/sc7a20h_app.c
 )

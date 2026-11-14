@@ -1,6 +1,7 @@
-2026-11-13T11:59:43.611Z west build --build-dir d:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build --domain nRF52832_Demo
-2026-11-13T11:59:44.303Z -- west build: building domain(s): nRF52832_Demo
-2026-11-13T11:59:45.235Z [1/7] Building C object CMakeFiles/app.dir/src/sc7a20h_app.c.obj
+2026-11-14T13:27:50.207Z west build --build-dir d:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build --domain nRF52832_Demo
+2026-11-14T13:27:51.407Z -- west build: building domain(s): nRF52832_Demo
+2026-11-14T13:27:51.675Z ninja: no work to do.
+t CMakeFiles/app.dir/src/sc7a20h_app.c.obj
 2026-11-13T11:59:45.399Z [2/7] Linking C static library app\libapp.a
 2026-11-13T11:59:45.777Z [3/7] Linking C executable zephyr\zephyr_pre0.elf; Logical command for additional byproducts on target: zephyr_pre0
 2026-11-13T11:59:45.955Z [4/7] Generating linker.cmd
