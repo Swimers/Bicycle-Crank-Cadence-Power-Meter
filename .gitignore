@@ -20,3 +20,38 @@ _backup/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Build trees: keep IDE/user inputs, ignore reproducible compiler outputs.
+**/build/**
+**/build_*/**
+**/build-*/**
+**/cmake-build-*/**
+# Git must traverse build directories to find the configuration exceptions.
+!**/build/**/
+!**/build_*/**/
+!**/build-*/**/
+!**/cmake-build-*/**/
+!**/.vscode-nrf-connect.json
+!**/CMakePresets.json
+!**/CMakeUserPresets.json
+!**/*.conf
+!**/*.overlay
+# These subtrees contain generated configuration, not user-maintained input.
+**/build*/**/CMakeFiles/**
+**/build*/**/Kconfig/**
+**/build*/**/_sysbuild/**
+**/build*/**/zephyr/**
+**/cmake-build-*/**/CMakeFiles/**
+
+# Compiler outputs outside a conventional build directory.
+Software/**/*.o
+Software/**/*.obj
+Software/**/*.a
+Software/**/*.elf
+Software/**/*.hex
+Software/**/*.bin
+Software/**/*.map
+Software/**/*.gcda
+Software/**/*.gcno
+Software/**/.ninja_deps
+Software/**/.ninja_log

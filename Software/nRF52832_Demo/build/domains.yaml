@@ -1,7 +1,0 @@
-default: nRF52832_Demo
-build_dir: D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build
-domains:
-  - name: nRF52832_Demo
-    build_dir: D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo
-flash_order:
-  - nRF52832_Demo
