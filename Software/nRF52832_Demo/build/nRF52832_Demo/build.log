@@ -1,15 +1,14 @@
-2026-11-13T11:37:37.579Z west build --build-dir d:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build --domain nRF52832_Demo
-2026-11-13T11:37:38.362Z -- west build: building domain(s): nRF52832_Demo
-2026-11-13T11:37:38.538Z ninja: no work to do.
-t CMakeFiles/app.dir/src/main.c.obj
-2026-11-12T11:19:18.065Z [2/7] Linking C static library app\libapp.a
-2026-11-12T11:19:18.347Z [3/7] Linking C executable zephyr\zephyr_pre0.elf; Logical command for additional byproducts on target: zephyr_pre0
-2026-11-12T11:19:18.510Z [4/7] Generating linker.cmd
-2026-11-12T11:19:18.898Z [5/7] Generating isr_tables.c, isr_tables_vt.ld, isr_tables_swi.ld
-2026-11-12T11:19:19.502Z [6/7] Building C object zephyr/CMakeFiles/zephyr_final.dir/isr_tables.c.obj
-2026-11-12T11:19:20.439Z [7/7] Linking C executable zephyr\zephyr.elf
-2026-11-12T11:19:20.439Z Memory region         Used Size  Region Size  %age Used
-2026-11-12T11:19:20.440Z            FLASH:      105652 B       512 KB     20.15%
-2026-11-12T11:19:20.440Z              RAM:       20200 B        64 KB     30.82%
-2026-11-12T11:19:20.440Z         IDT_LIST:           0 B        32 KB      0.00%
-2026-11-12T11:19:20.440Z Generating files from D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/zephyr.elf for board: nrf52dk/nrf52832
+2026-11-13T11:59:43.611Z west build --build-dir d:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build --domain nRF52832_Demo
+2026-11-13T11:59:44.303Z -- west build: building domain(s): nRF52832_Demo
+2026-11-13T11:59:45.235Z [1/7] Building C object CMakeFiles/app.dir/src/sc7a20h_app.c.obj
+2026-11-13T11:59:45.399Z [2/7] Linking C static library app\libapp.a
+2026-11-13T11:59:45.777Z [3/7] Linking C executable zephyr\zephyr_pre0.elf; Logical command for additional byproducts on target: zephyr_pre0
+2026-11-13T11:59:45.955Z [4/7] Generating linker.cmd
+2026-11-13T11:59:46.418Z [5/7] Generating isr_tables.c, isr_tables_vt.ld, isr_tables_swi.ld
+2026-11-13T11:59:47.146Z [6/7] Building C object zephyr/CMakeFiles/zephyr_final.dir/isr_tables.c.obj
+2026-11-13T11:59:48.195Z [7/7] Linking C executable zephyr\zephyr.elf
+2026-11-13T11:59:48.195Z Memory region         Used Size  Region Size  %age Used
+2026-11-13T11:59:48.195Z            FLASH:      110632 B       512 KB     21.10%
+2026-11-13T11:59:48.195Z              RAM:       26288 B        64 KB     40.11%
+2026-11-13T11:59:48.195Z         IDT_LIST:           0 B        32 KB      0.00%
+2026-11-13T11:59:48.195Z Generating files from D:/Documents/GitHub/CadenceSensor/Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/zephyr.elf for board: nrf52dk/nrf52832

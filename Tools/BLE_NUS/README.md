@@ -54,6 +54,8 @@ py -3 -m venv .venv
 .\.venv\Scripts\python.exe -m unittest -v
 ```
 
-测试覆盖 UTF-8 数据分包、通知接收、服务缺失时清理连接、断连后拒绝发送和写入异常传播。需要真实设备验证 RF 连接和 MCU 回显。
+测试覆盖 UTF-8 数据分包、通知接收、服务缺失时清理连接、断连后拒绝发送和写入异常传播。
+
+2026-11-13 本机验证：Windows 11 / Python 3.14 / BARROT Bluetooth Adapter。四项传输测试通过；Tk 界面创建、跨包中文显示、清空与后台线程关闭通过。通过真实 `CadenceSensor` 成功发现 NUS、订阅 TX、收到 MCU 启动 `printk()` 日志，发送 `[PC_NUS_TEST]` 后收到原文回显，随后主动断开。此记录不代表已完成长时间或高速吞吐测试。
 
 实现依据：[Bleak 客户端文档](https://bleak.readthedocs.io/en/stable/api/client.html)、[Windows 后端](https://bleak.readthedocs.io/en/stable/backends/windows.html)。

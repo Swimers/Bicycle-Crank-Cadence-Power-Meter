@@ -3,12 +3,12 @@
 #include <zephyr/bluetooth/conn.h>
 #include <zephyr/bluetooth/services/nus.h>
 #include <zephyr/device.h>
-#include <zephyr/drivers/i2c.h>
 #include <zephyr/drivers/uart.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/sys/util.h>
 
-static const struct device *const i2c_bus = DEVICE_DT_GET(DT_NODELABEL(i2c0));
+#include "sc7a20h_app.h"
+
 static const struct device *const ble_console = DEVICE_DT_GET(DT_CHOSEN(zephyr_console));
 
 struct connection_event {
@@ -83,12 +83,6 @@ int main(void)
 		return 0;
 	}
 
-	if (!device_is_ready(i2c_bus)) {
-		printk("I2C0 controller is not ready\n");
-		return 0;
-	}
-	printk("I2C0 ready: SCL=P0.15, SDA=P0.14, 100 kHz\n");
-
 	err = bt_enable(NULL);
 	if (err) {
 		printk("Bluetooth initialization failed (%d)\n", err);
@@ -96,11 +90,13 @@ int main(void)
 	}
 
 	k_work_submit(&advertising_work);
+	sc7a20h_app_start();
 
 	/* Subscribe to NUS TX notifications to receive buffered printk text.
 	 * NUS RX writes are echoed here to verify bidirectional text transport.
 	 */
 	while (true) {
+		sc7a20h_app_process();
 		while (k_msgq_get(&connection_events, &event, K_NO_WAIT) == 0) {
 			if (event.connected) {
 				printk("BLE connection status: 0x%02x\n", event.status);
