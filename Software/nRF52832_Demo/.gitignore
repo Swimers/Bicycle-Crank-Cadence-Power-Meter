@@ -1,1 +1,3 @@
 # Build outputs and configuration exceptions are managed by /.gitignore.
+__pycache__/
+*.pyc

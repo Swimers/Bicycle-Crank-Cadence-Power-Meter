@@ -4,6 +4,7 @@
 #include <zephyr/dt-bindings/i2c/i2c.h>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 #include "cadence_sensor_nrf52832-pinctrl.dtsi"
+#include "cadence_sensor_partitions.dtsi"
 
 / {
 	model = "CadenceSensor nRF52832 Demo Board";
@@ -12,12 +13,15 @@
 	chosen {
 		zephyr,sram = &sram0;
 		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+		zephyr,boot-mode = &boot_mode0;
 		/* Physical console default; the application overlay selects NUS. */
 		zephyr,console = &uart0;
 	};
 
 	aliases {
 		sw0 = &user_button;
+		mcuboot-button0 = &user_button;
 		accel0 = &sc7a20h;
 	};
 

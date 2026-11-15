@@ -1,4 +1,5 @@
 #include "bluetooth_app.h"
+#include "ota_entry.h"
 
 #include <errno.h>
 #include <zephyr/kernel.h>
@@ -110,5 +111,6 @@ void bluetooth_app_process(void)
 
 	for (int i = 0; i < 64 && uart_poll_in(ble_console, &c) == 0; i++) {
 		printk("%c", c);
+		ota_entry_feed(c);
 	}
 }

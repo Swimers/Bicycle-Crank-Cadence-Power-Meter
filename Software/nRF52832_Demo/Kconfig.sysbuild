@@ -1,0 +1,12 @@
+choice FIRMWARE_LOADER
+config FIRMWARE_LOADER_IMAGE_CADENCE
+	bool "CadenceSensor BLE Loader"
+endchoice
+
+config FIRMWARE_LOADER_IMAGE_NAME
+	default "ble_loader" if FIRMWARE_LOADER_IMAGE_CADENCE
+
+config FIRMWARE_LOADER_IMAGE_PATH
+	default "$(APP_DIR)/loader" if FIRMWARE_LOADER_IMAGE_CADENCE
+
+source "$(ZEPHYR_BASE)/share/sysbuild/Kconfig"

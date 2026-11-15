@@ -73,8 +73,7 @@ static void sample_thread(void *p1, void *p2, void *p3)
 	}
 }
 
-K_THREAD_DEFINE(sc7a20h_thread, 1536, sample_thread, NULL, NULL, NULL,
-		7, 0, SYS_FOREVER_MS);
+K_THREAD_DEFINE(sc7a20h_thread, 1536, sample_thread, NULL, NULL, NULL, 7, 0, SYS_FOREVER_MS);
 
 void sc7a20h_app_start(void)
 {
