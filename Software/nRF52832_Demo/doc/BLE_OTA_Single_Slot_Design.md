@@ -83,7 +83,8 @@ nRF52832_Demo/
 ├─ boards/others/cadence_sensor/
 │  └─ cadence_sensor_partitions.dtsi
 ├─ src/
-│  └─ ota_entry.c                 拟新增的业务升级入口
+│  └─ app/
+│     └─ ota_entry.c              业务升级入口
 └─ doc/
    └─ BLE_OTA_Single_Slot_Design.md
 ```
