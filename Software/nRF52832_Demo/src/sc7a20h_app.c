@@ -5,8 +5,8 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
 
-/* Board SDO is tied high: Zephyr uses the 7-bit address 0x19. */
-#define SENSOR_ADDRESS SC7A20H_ADDR_HIGH
+#define SENSOR_NODE DT_ALIAS(accel0)
+#define SENSOR_ADDRESS DT_REG_ADDR(SENSOR_NODE)
 #define STATUS_OVERRUN 0x80U
 
 struct sensor_snapshot {
@@ -26,7 +26,7 @@ K_MUTEX_DEFINE(snapshot_lock);
 static void sample_thread(void *p1, void *p2, void *p3)
 {
 	struct sensor_snapshot state = {0};
-	const struct device *bus = DEVICE_DT_GET(DT_NODELABEL(i2c0));
+	const struct device *bus = DEVICE_DT_GET(DT_BUS(SENSOR_NODE));
 	int64_t last_data;
 
 	ARG_UNUSED(p1);

@@ -1,0 +1,7 @@
+description: SC7A20H accelerometer used by the application's polling driver
+compatible: "silan,sc7a20h"
+include: i2c-device.yaml
+properties:
+  int1-gpios:
+    type: phandle-array
+    description: INT1 connection; the application currently uses polling

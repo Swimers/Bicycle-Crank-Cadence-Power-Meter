@@ -1,0 +1,6 @@
+board:
+  name: cadence_sensor
+  full_name: CadenceSensor nRF52832 Demo Board
+  vendor: others
+  socs:
+    - name: nrf52832

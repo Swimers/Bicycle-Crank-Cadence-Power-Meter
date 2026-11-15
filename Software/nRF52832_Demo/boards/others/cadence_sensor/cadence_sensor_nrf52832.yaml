@@ -1,0 +1,13 @@
+identifier: cadence_sensor/nrf52832
+name: CadenceSensor nRF52832 Demo Board
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+ram: 64
+flash: 512
+supported:
+  - gpio
+  - i2c
+  - uart
+vendor: others

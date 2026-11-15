@@ -1,8 +1,8 @@
 {
     "nrf-connect.applications": [
-        "${workspaceFolder}\\Software\\nRF52832_DemoBoard"
+        "${workspaceFolder}\\Software\\nRF52832_Demo"
     ],
     "nrf-connect.boardRoots": [
-        "${workspaceFolder}/Software/nRF52832_DemoBoard"
+        "${workspaceFolder}/Software/nRF52832_Demo"
     ]
 }
