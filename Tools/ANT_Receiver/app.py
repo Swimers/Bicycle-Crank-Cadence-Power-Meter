@@ -1,4 +1,5 @@
 import asyncio
+import json
 import queue
 import struct
 import threading
@@ -24,6 +25,8 @@ class App:
         self.devices, self.clients = {}, {}
         self.ant_node = None
         self.ant_thread = None
+        self.serial_thread = None
+        self.serial_stop = threading.Event()
         self.stop_requested = threading.Event()
         self.closing = False
         root.title('BLE / ANT+ 多设备监测')
@@ -38,6 +41,15 @@ class App:
         ttk.Button(bar, text='断开所选 BLE', command=self.disconnect).pack(side='left')
         ttk.Button(bar, text='启动 ANT+ 接收', command=self.start_ant).pack(side='left', padx=6)
         ttk.Button(bar, text='停止 ANT+', command=self.stop_ant).pack(side='left')
+        serial_bar = ttk.Frame(f)
+        serial_bar.pack(fill='x', pady=(8, 0))
+        ttk.Label(serial_bar, text='nRF52840 串口').pack(side='left')
+        self.serial_port = ttk.Combobox(serial_bar, width=20)
+        self.serial_port.pack(side='left', padx=6)
+        ttk.Button(serial_bar, text='刷新串口', command=self.refresh_ports).pack(side='left')
+        ttk.Button(serial_bar, text='连接串口', command=self.start_serial).pack(side='left', padx=6)
+        ttk.Button(serial_bar, text='断开串口', command=self.stop_serial).pack(side='left')
+        self.refresh_ports()
         ttk.Label(f, text='BLE：选择设备后连接；ANT+：需要 ANT USB 接收器，启动后监听广播。').pack(anchor='w', pady=8)
         cols = ('protocol', 'device', 'name', 'state', 'hr', 'cadence', 'power', 'updated')
         self.table = ttk.Treeview(f, columns=cols, show='headings', selectmode='browse')
@@ -198,6 +210,79 @@ class App:
         if node:
             threading.Thread(target=node.stop, daemon=True).start()
 
+    def refresh_ports(self):
+        try:
+            from serial.tools import list_ports
+            self.serial_port['values'] = [p.device for p in list_ports.comports()]
+        except ImportError:
+            self.serial_port['values'] = []
+
+    def start_serial(self):
+        if self.serial_thread and self.serial_thread.is_alive():
+            self.status.set('串口已连接或正在连接。')
+            return
+        port = self.serial_port.get().strip()
+        if not port:
+            self.status.set('请选择或输入 nRF52840 串口。')
+            return
+        self.serial_stop.clear()
+        self.serial_thread = threading.Thread(target=self.serial_run, args=(port,), daemon=True)
+        self.serial_thread.start()
+
+    def serial_run(self, port):
+        try:
+            import serial
+            with serial.Serial(port, 115200, timeout=0.2, write_timeout=1) as conn:
+                conn.write(b'STATUS\n')
+                self.emit('status', f'{port} 已打开，等待 ANT 状态。')
+                pending = b''
+                discard = False
+                while not self.serial_stop.is_set():
+                    fragment = conn.readline(1024)
+                    if not fragment:
+                        continue
+                    if discard:
+                        discard = not fragment.endswith(b'\n')
+                        continue
+                    pending += fragment
+                    if len(pending) > 1024:
+                        discard = not fragment.endswith(b'\n')
+                        pending = b''
+                        continue
+                    if not fragment.endswith(b'\n'):
+                        continue
+                    line, pending = pending, b''
+                    try:
+                        message = json.loads(line.decode('utf-8'))
+                        if not isinstance(message, dict) or message.get('v') != 1:
+                            continue
+                        if message.get('type') == 'status':
+                            error = message.get('ant_start_error')
+                            self.emit('status', 'nRF52840 ANT+ 已启动，等待广播。' if error == 0 else f'nRF52840 ANT+ 启动失败：{error}')
+                        elif message.get('type') == 'measurement':
+                            number = int(message['device_id'])
+                            typ = int(message['device_type'])
+                            trans = int(message['transmission_type'])
+                            raw = bytes.fromhex(message['raw'])
+                            if not (0 <= number <= 65535 and 0 <= typ <= 127 and 0 <= trans <= 255 and len(raw) == 8):
+                                continue
+                            values = {}
+                            for field, column in [('heart_rate_bpm', 'hr'), ('cadence_rpm', 'cadence'), ('power_w', 'power')]:
+                                value = message.get(field)
+                                if isinstance(value, (int, float)) and not isinstance(value, bool) and 0 <= value <= 65535:
+                                    values[column] = value
+                            key = f'CDC:{number}:{typ}:{trans}'
+                            self.emit('serial_measurement', key, number, typ, trans, raw, values)
+                    except (ValueError, TypeError, KeyError, UnicodeError):
+                        continue
+        except Exception as e:
+            self.emit('status', f'串口连接失败：{type(e).__name__}: {e}')
+        finally:
+            self.emit('serial_closed')
+
+    def stop_serial(self):
+        self.serial_stop.set()
+
     def row(self, key, **changes):
         if not self.table.exists(key):
             self.table.insert('', 'end', iid=key, values=('', '', '', '', '', '', '', ''))
@@ -238,6 +323,19 @@ class App:
                         self.log.delete('1.0', '101.0')
                     self.log.see('end')
                     self.log.config(state='disabled')
+                elif kind == 'serial_measurement':
+                    key, number, typ, trans, data, values = args
+                    self.row(key, protocol='ANT+ 串口', device=f'{number} / {trans}', name={11:'功率计', 120:'心率', 121:'速度/踏频', 122:'踏频'}.get(typ, f'类型 {typ}'), state='接收中', updated=datetime.now().strftime('%H:%M:%S'), **{k: f'{v:.1f}' if isinstance(v, float) else str(v) for k, v in values.items()})
+                    self.log.config(state='normal')
+                    self.log.insert('end', f'{datetime.now():%H:%M:%S} {key} {typ} {data.hex(" ")}\n')
+                    if int(self.log.index('end-1c').split('.')[0]) > 500:
+                        self.log.delete('1.0', '101.0')
+                    self.log.see('end')
+                    self.log.config(state='disabled')
+                elif kind == 'serial_closed':
+                    for key in self.table.get_children():
+                        if key.startswith('CDC:'):
+                            self.row(key, state='已断开')
             except (ValueError, IndexError, struct.error) as e:
                 self.status.set(f'数据解析失败：{e}')
         self.root.after(50, self.poll)
@@ -245,6 +343,7 @@ class App:
     def close(self):
         self.closing = True
         self.stop_ant()
+        self.stop_serial()
         async def shutdown():
             tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
             for task in tasks:
@@ -254,7 +353,7 @@ class App:
             self.loop.call_soon(self.loop.stop)
         asyncio.run_coroutine_threadsafe(shutdown(), self.loop)
         def wait(count=0):
-            if (not self.thread.is_alive() and (not self.ant_thread or not self.ant_thread.is_alive())) or count >= 100:
+            if (not self.thread.is_alive() and (not self.ant_thread or not self.ant_thread.is_alive()) and (not self.serial_thread or not self.serial_thread.is_alive())) or count >= 100:
                 self.root.destroy()
             else:
                 self.root.after(100, wait, count + 1)

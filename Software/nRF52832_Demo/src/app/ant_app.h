@@ -12,6 +12,8 @@ extern "C" {
 #define ANT_APP_PAGE_CRANK_TORQUE        0x12U
 #define ANT_APP_CADENCE_UNAVAILABLE      0xffU
 #define ANT_APP_PEDAL_POWER_UNAVAILABLE  0xffU
+#define ANT_APP_FIXED_POWER_WATTS        250U
+#define ANT_APP_FIXED_CADENCE_RPM        90U
 
 #define ANT_APP_CHANNEL_BIDIR_MASTER    0x10U
 #define ANT_APP_DEVICE_TYPE_BICYCLE_POWER 0x0bU
@@ -30,15 +32,14 @@ struct ant_app_channel_config {
 	uint16_t channel_period;
 };
 
-/* Profile defaults only. Device number 1 is a development placeholder;
- * replace it with a per-device identifier when a real backend is added.
- * The backend must separately configure the ANT+ managed network key.
+/* Device number 1 is a development placeholder; use a unique nonzero number
+ * per product. The backend configures the ANT+ key via the SDK key manager.
  */
 extern const struct ant_app_channel_config ant_app_default_channel_config;
 
 /* Page 0x10: caller supplies an updated measurement snapshot.
  * Native integer values, NOT a buffer to pass directly to a radio API.
- * A future serializer must explicitly write 16-bit values little endian.
+ * The backend explicitly serializes 16-bit values little endian.
  */
 struct ant_app_power_only_data {
 	uint8_t page_number;            /* ANT_APP_PAGE_POWER_ONLY. */
@@ -50,7 +51,7 @@ struct ant_app_power_only_data {
 };
 
 /* Page 0x12: cumulative quantities, not a single revolution's duration/torque.
- * Native integer values; future wire encoding must be little endian.
+ * Native integer values; the backend encodes the wire payload little endian.
  */
 struct ant_app_crank_torque_data {
 	uint8_t page_number;            /* ANT_APP_PAGE_CRANK_TORQUE. */
@@ -61,14 +62,16 @@ struct ant_app_crank_torque_data {
 	uint16_t accumulated_torque;    /* Units: 1/32 Nm, wraps at 65536. */
 };
 
-/* INTERFACE SCAFFOLD ONLY: no ANT stack/channel is opened in this revision.
- * init: -EINVAL for NULL config / zero device number; otherwise -ENOTSUP.
- * send: -EINVAL for NULL data / incorrect page number; otherwise -ENOTSUP.
- * No measurement is queued, encoded or transmitted, and no counter is updated.
- * Future return 0 must mean accepted by the backend, not received by a display.
+/* Initialize ANT before BLE. With CONFIG_ANT, opens a Bicycle Power channel
+ * and starts the fixed 250 W / 90 RPM 0x10 test stream. Native stack errors
+ * return -EIO and are reported by process(); duplicate init returns -EALREADY.
+ * Without the official ANT add-on, returns -ENOTSUP without touching RADIO.
+ * send: -EINVAL for NULL/wrong page, -ENODEV if closed. A successful send
+ * replaces the next payload and exits fixed-test mode; caller then owns all
+ * counters. Return 0 means accepted locally, not received by a display.
  */
 int ant_app_init(const struct ant_app_channel_config *config);
-void ant_app_process(void); /* Reserved event processing hook; currently a no-op. */
+void ant_app_process(void); /* Low-rate diagnostics; never drives radio timing. */
 int ant_app_send_power_only(const struct ant_app_power_only_data *data);
 int ant_app_send_crank_torque(const struct ant_app_crank_torque_data *data);
 

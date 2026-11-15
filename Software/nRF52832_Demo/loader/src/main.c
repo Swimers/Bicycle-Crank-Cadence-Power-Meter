@@ -3,7 +3,7 @@
 #include <zephyr/bluetooth/conn.h>
 #include <zephyr/mgmt/mcumgr/transport/smp_bt.h>
 #include <zephyr/mgmt/mcumgr/mgmt/callbacks.h>
-#include <zephyr/storage/flash_map.h>
+#include <zephyr/devicetree.h>
 #include <fprotect.h>
 
 static const struct bt_data ad[] = {
@@ -64,12 +64,15 @@ int main(void)
 	/* BPROT survives until reset: malformed SMP commands cannot erase Loader,
 	 * bootloader or settings. Only the business slot remains writable.
 	 */
-	if (fprotect_area(PARTITION_OFFSET(boot_partition),
-			  PARTITION_SIZE(boot_partition)) != 0 ||
-	    fprotect_area(PARTITION_OFFSET(slot1_partition),
-			  PARTITION_SIZE(slot1_partition)) != 0 ||
-	    fprotect_area(PARTITION_OFFSET(storage_partition),
-			  PARTITION_SIZE(storage_partition)) != 0) {
+	/* Internal flash starts at zero on this board. Read the fixed DTS map
+	 * directly so the protection code works across both supported SDKs.
+	 */
+	if (fprotect_area(DT_REG_ADDR(DT_NODELABEL(boot_partition)),
+			  DT_REG_SIZE(DT_NODELABEL(boot_partition))) != 0 ||
+	    fprotect_area(DT_REG_ADDR(DT_NODELABEL(slot1_partition)),
+			  DT_REG_SIZE(DT_NODELABEL(slot1_partition))) != 0 ||
+	    fprotect_area(DT_REG_ADDR(DT_NODELABEL(storage_partition)),
+			  DT_REG_SIZE(DT_NODELABEL(storage_partition))) != 0) {
 		return 0;
 	}
 	if (bt_enable(NULL) != 0) {

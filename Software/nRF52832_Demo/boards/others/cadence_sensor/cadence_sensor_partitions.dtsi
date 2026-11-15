@@ -1,26 +1,23 @@
 /* Stable OTA layout: slot1 is a resident Loader, never a staging slot. */
 &flash0 {
 	partitions {
-		ranges;
+		/* Supported by both ANT's NCS 3.2.4 and the original NCS 3.4.1. */
+		compatible = "fixed-partitions";
 		#address-cells = <1>;
 		#size-cells = <1>;
 		boot_partition: partition@0 {
-			compatible = "zephyr,mapped-partition";
 			label = "mcuboot";
 			reg = <0x00000 0x10000>;
 		};
 		slot0_partition: partition@10000 {
-			compatible = "zephyr,mapped-partition";
 			label = "image-0";
 			reg = <0x10000 0x3c000>;
 		};
 		slot1_partition: partition@4c000 {
-			compatible = "zephyr,mapped-partition";
 			label = "image-1";
 			reg = <0x4c000 0x30000>;
 		};
 		storage_partition: partition@7c000 {
-			compatible = "zephyr,mapped-partition";
 			label = "storage";
 			reg = <0x7c000 0x4000>;
 		};

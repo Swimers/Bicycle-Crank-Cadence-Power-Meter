@@ -1,6 +1,8 @@
 # BLE / ANT+ 多设备监测
 
-双击 `start.cmd`，首次启动会创建本地 Python 虚拟环境并安装依赖。需要 Windows 11、Python 3.10+ 和 Tk。蓝牙使用 Windows BLE 驱动；ANT+ 必须使用支持 ANT 连续扫描的 ANT USB 接收器，Windows 驱动需兼容 libusb（如 WinUSB），并且不能被其他程序占用。普通蓝牙 USB 适配器不能接收 ANT+。
+双击 `start.cmd`，首次启动会创建本地 Python 虚拟环境并安装依赖；已有虚拟环境可运行 `.venv\Scripts\python -m pip install -r requirements.txt` 更新依赖。需要 Windows 11、Python 3.10+ 和 Tk。蓝牙使用 Windows BLE 驱动；使用 ANT USB 接收器时，Windows 驱动需兼容 libusb（如 WinUSB），并且不能被其他程序占用。普通蓝牙 USB 适配器不能接收 ANT+。
+
+nRF52840 接收器：刷入本项目的 ANT 固件后，刷新并选择设备的 CDC 串口，点击“连接串口”。设备自动开始监听，界面显示来自串口的设备和解码值；同一串口不能同时被其他程序占用。此路径目前仍需实际 ANT+ 传感器验证。
 
 BLE：扫描，选择设备并连接；可逐个连接多个设备。支持标准 Heart Rate Measurement、CSC Measurement、Cycling Power Measurement 通知。连接数量取决于蓝牙适配器和设备。设备未在广播中声明服务也可选择连接后发现服务。
 
