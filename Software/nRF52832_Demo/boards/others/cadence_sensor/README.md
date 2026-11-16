@@ -26,17 +26,16 @@ SC7A20H 的自定义应用驱动从 `accel0` 别名读取总线和地址；本�
 其预留 1 MHz / SPI mode 1 参数应随后续驱动进行硬件验证。
 
 当前固件不启用 SPI/ADC、PWM、NFC、片上温度和看门狗；未添加不存在的 LED、蜂鸣器、
-Arduino 接口或 MCUboot 分区。SPI0/I2C1/SPI2 保持 SoC 默认禁用。
+Arduino 接口。MCUboot、业务、Loader 和参数分区定义在公共分区文件中。SPI0/I2C1/SPI2 保持 SoC 默认禁用。
 
 ## 构建
 
-在已经加载 nRF Connect SDK 工具链的 PowerShell 中，从应用目录执行：
+使用项目唯一配置：NCS 3.2.4、对应工具链、ANT add-on 2.1.1，板为 `cadence_sensor/nrf52832`，顶层输出目录为 `build`，启用 Sysbuild。
+
+从应用目录运行：
 
 ```powershell
-west build -b cadence_sensor/nrf52832 -d build_cadence_sensor . -- "-DBOARD_ROOT=$PWD" "-DDTS_ROOT=$PWD"
+.\scripts\build.ps1 -Pristine
 ```
 
-VS Code 中选择板 `cadence_sensor/nrf52832`，构建目录使用 `build_cadence_sensor`。
-旧 nRF52 DK 的 `build` 目录及构建配置已删除，仅保留 `build_cadence_sensor`。
-板根目录已写入仓库 `.vscode/settings.json`，构建目录已加入忽略规则。
-当前不声明 OTA/Bootloader 布局。
+后续省略 `-Pristine`。IDE 选择同一个顶层 `build`，其内部业务、MCUboot、BLE Loader 三个镜像共同组成启动链。SDK 路径、OTA 产物和构建方式见 [项目说明](../../../README.md)。

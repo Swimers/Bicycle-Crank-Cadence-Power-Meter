@@ -1,6 +1,8 @@
 # MCUboot 单业务槽 OTA：实现与实机验证
 
-验证日期：2026-11-15。工程：`Software/nRF52832_Demo`。SDK：NCS v3.4.1 / Zephyr 4.4.2。
+历史实机验证日期：2026-11-15，环境为 NCS v3.4.1 / Zephyr 4.4.2。工程：`Software/nRF52832_Demo`。
+
+2026-11-16 起，项目构建入口已统一为 NCS 3.2.4 / `build`，同时启用 ANT、BLE、OTA。以下操作命令已同步到当前路径；原有实机结果和占用数据是历史记录，不代表已重新验证当前固件的无线功能。当前构建方式见 [项目说明](../README.md)。
 
 ## 结果
 
@@ -47,22 +49,22 @@ Set-Location D:\Documents\GitHub\CadenceSensor
 & .\Software\nRF52832_Demo\scripts\build.ps1 -Pristine
 ```
 
-`build.ps1` 默认 SDK 为 `D:/ncs/v3.4.1`，工具链为 `C:/ncs/toolchains/4f5b6ad6dd`，可用 `-SdkRoot`、`-ToolchainRoot` 覆盖。后续增量构建省略 `-Pristine`。
+`build.ps1` 默认 SDK 为 `D:/ncs/v3.2.4`，工具链为 `C:/ncs/toolchains/fd21892d0f`，另行加载 ANT add-on 2.1.1；可用 `-SdkRoot`、`-ToolchainRoot`、`-AntModuleDir` 覆盖。后续增量构建省略 `-Pristine`。
 
-脚本在编译后运行 `package.py`，检查最终有效 Kconfig，包括 MCUboot 验签、Loader 的 SMP/ZCBOR 和保护回调，合并三个 HEX，并拒绝地址内容冲突。
+统一 sysbuild 在所有镜像编译后运行 `package.py`（脚本及 IDE 均执行），检查最终有效 Kconfig，包括 MCUboot 验签、Loader 的 SMP/ZCBOR 和保护回调，合并三个 HEX，并拒绝地址内容冲突。
 
 | 输出 | 用途 |
 |---|---|
-| `build_ota/merged.hex` | 初次 SWD 烧录整个启动链 |
-| `build_ota/dfu_application.zip` | SDK 生成的业务更新包；本轮未实测手机 ZIP 导入流程 |
-| `build_ota/nRF52832_Demo/zephyr/zephyr.signed.bin` | 本机已验证的 SMP 业务 OTA 镜像 |
-| `build_ota/ota_artifacts.json` | 各镜像 HEX 地址段、文件 SHA-256 |
+| `build/merged.hex` | 初次 SWD 烧录整个启动链 |
+| `build/dfu_application.zip` | SDK 生成的业务更新包；本轮未实测手机 ZIP 导入流程 |
+| `build/nRF52832_Demo/zephyr/zephyr.signed.bin` | 本机已验证的 SMP 业务 OTA 镜像 |
+| `build/ota_artifacts.json` | 各镜像 HEX 地址段、文件 SHA-256 |
 
 通过已连接 fireDAP 烧录并读回比对：
 
 ```powershell
-$ncsPython = 'C:/ncs/toolchains/4f5b6ad6dd/opt/bin/python.exe'
-& $ncsPython Software/nRF52832_Demo/scripts/probe.py flash --hex Software/nRF52832_Demo/build_ota/merged.hex
+$ncsPython = 'C:/ncs/toolchains/fd21892d0f/opt/bin/python.exe'
+& $ncsPython Software/nRF52832_Demo/scripts/probe.py flash --hex Software/nRF52832_Demo/build/merged.hex
 ```
 
 本机探针 ID 为 `0123456789abcdef`，其他探针使用 `--probe <ID>`。脚本选择 `nrf52832`，SWD 1 MHz，禁用自动解锁，按页擦除，不整片擦除。首次烧录前已备份原 512 KB Flash 和 UICR 至 `tmp/ota-validation/before/`。
@@ -92,7 +94,7 @@ $blePython = 'Tools/BLE_NUS/.venv/Scripts/python.exe'
 & $blePython Tools/BLE_OTA/ota.py status --address E6:BD:02:05:A6:FE
 
 # 直接覆盖唯一业务槽，完成后请求复位。
-& $blePython Tools/BLE_OTA/ota.py upload --address E6:BD:02:05:A6:FE --image Software/nRF52832_Demo/build_ota/nRF52832_Demo/zephyr/zephyr.signed.bin --reset
+& $blePython Tools/BLE_OTA/ota.py upload --address E6:BD:02:05:A6:FE --image Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/zephyr.signed.bin --reset
 
 # 重连业务应用核对版本。
 & $blePython Tools/BLE_OTA/ota.py nus --address E6:BD:02:05:A6:FE

@@ -13,8 +13,12 @@ required = {
     "ble_loader": ["CONFIG_MCUMGR=y", "CONFIG_ZCBOR=y", "CONFIG_MCUMGR_TRANSPORT_BT=y",
                    "CONFIG_MCUBOOT_APPLICATION_FIRMWARE_UPDATER=y",
                    "CONFIG_MCUMGR_SMP_COMMAND_STATUS_HOOKS=y", "CONFIG_FPROTECT=y"],
-    "nRF52832_Demo": ["CONFIG_BOOTLOADER_MCUBOOT=y", "CONFIG_RETENTION_BOOT_MODE=y"],
+    "nRF52832_Demo": ["CONFIG_BOOTLOADER_MCUBOOT=y", "CONFIG_RETENTION_BOOT_MODE=y",
+                     "CONFIG_ANT=y", "CONFIG_BT=y", "CONFIG_UART_BT=y", "CONFIG_I2C=y",
+                     "CONFIG_ANT_TOTAL_CHANNELS_ALLOCATED=1"],
 }
+partitions = {"mcuboot": (0, 0x10000), "nRF52832_Demo": (0x10000, 0x3c000),
+              "ble_loader": (0x4c000, 0x30000)}
 merged = IntelHex()
 defined = set()
 report = {}
@@ -24,8 +28,17 @@ for name, settings in required.items():
     for setting in settings:
         if setting not in config:
             raise RuntimeError(f"{name}: missing effective setting {setting}")
+    if name != "nRF52832_Demo" and "CONFIG_ANT=y" in config:
+        raise RuntimeError(f"{name}: ANT must only be enabled in the business image")
+    values = dict(line.split("=", 1) for line in config if line.startswith("CONFIG_") and "=" in line)
+    offset, capacity = partitions[name]
+    if (int(values["CONFIG_FLASH_LOAD_OFFSET"], 0),
+            int(values["CONFIG_FLASH_LOAD_SIZE"], 0)) != (offset, capacity):
+        raise RuntimeError(f"{name}: unexpected Flash partition")
     hexfile = folder / ("zephyr.hex" if name == "mcuboot" else "zephyr.signed.hex")
     image = IntelHex(str(hexfile))
+    if image.minaddr() != offset or image.maxaddr() >= offset + capacity:
+        raise RuntimeError(f"{name}: HEX exceeds its Flash partition")
     for address in image.addresses():
         if address in defined and merged[address] != image[address]:
             raise RuntimeError(f"Conflicting HEX at 0x{address:x}")

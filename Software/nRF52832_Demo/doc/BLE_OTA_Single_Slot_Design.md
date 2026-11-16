@@ -15,7 +15,7 @@
 
 | 项目 | 已检查的配置或产物 |
 |---|---|
-| SDK | nRF Connect SDK v3.4.1 |
+| SDK | nRF Connect SDK v3.2.4 |
 | 板级目标 | `cadence_sensor/nrf52832` |
 | 芯片容量配置 | 512 KB Flash、64 KB RAM |
 | 蓝牙 | SoftDevice Controller、BLE Peripheral、NUS 串口 |
@@ -68,7 +68,7 @@ flowchart TD
 
 ## 3. 工程组织与核心配置
 
-使用一个开启 sysbuild 的顶层 Build Configuration，统一构建三个独立镜像。建议新建 `build_ota` 构建目录，保留原构建目录用于对照。
+使用唯一开启 sysbuild 的顶层 `build` 配置，统一构建三个独立镜像。当前 NCS 3.2.4 同时承载 ANT、BLE 和 OTA；构建命令见 [项目说明](../README.md)。
 
 ```text
 nRF52832_Demo/
@@ -244,11 +244,11 @@ watchdog 只能触发复位，不能单独保证运行故障自动进入 Loader�
 
 ## 6. 参考资料
 
-- 本机 NCS v3.4.1：`D:/ncs/v3.4.1/nrf/samples/mcuboot/firmware_loader_entrance/`。
-- 本机 Loader 示例：`D:/ncs/v3.4.1/nrf/samples/dfu/fw_loader/ble_mcumgr/`。
-- 本机启动实现：`D:/ncs/v3.4.1/bootloader/mcuboot/boot/zephyr/firmware_loader.c`。
-- 本机分区说明：`D:/ncs/v3.4.1/nrf/doc/nrf/app_dev/bootloaders_dfu/mcuboot_nsib/bootloader_partitioning.rst`。
+- 本机 NCS v3.2.4：`D:/ncs/v3.2.4/nrf/samples/mcuboot/firmware_loader_entrance/`。
+- 本机 Loader 示例：`D:/ncs/v3.2.4/nrf/samples/dfu/fw_loader/ble_mcumgr/`。
+- 本机启动实现：`D:/ncs/v3.2.4/bootloader/mcuboot/boot/zephyr/firmware_loader.c`。
+- 本机分区说明：`D:/ncs/v3.2.4/nrf/doc/nrf/app_dev/bootloaders_dfu/mcuboot_nsib/bootloader_partitioning.rst`。
 - [Nordic：使用 sysbuild 配置启动链与 firmware loader](https://nrfconnectdocs.nordicsemi.com/ncs/latest/nrf/app_dev/bootloaders_dfu/mcuboot_nsib/bootloader_adding_sysbuild.html)。
 - [Zephyr：Sysbuild](https://docs.zephyrproject.org/latest/build/sysbuild/index.html)。
 
-在线 latest 文档可能高于当前 SDK，具体配置名和行为以本机 v3.4.1 源码、最终构建结果及硬件测试为准。
+在线 latest 文档可能高于当前 SDK，具体配置名和行为以本机 v3.2.4 源码、最终构建结果及硬件测试为准。

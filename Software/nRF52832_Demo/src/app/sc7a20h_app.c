@@ -91,7 +91,7 @@ void sc7a20h_app_process(void)
 	if (now < next_print) {
 		return;
 	}
-	next_print = now + 100;
+	next_print = now + 1000;
 	k_mutex_lock(&snapshot_lock, K_FOREVER);
 	state = snapshot;
 	k_mutex_unlock(&snapshot_lock);

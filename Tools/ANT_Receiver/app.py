@@ -39,8 +39,8 @@ class App:
         self.scan_btn.pack(side='left')
         ttk.Button(bar, text='连接所选 BLE', command=self.connect).pack(side='left', padx=6)
         ttk.Button(bar, text='断开所选 BLE', command=self.disconnect).pack(side='left')
-        ttk.Button(bar, text='启动 ANT+ 接收', command=self.start_ant).pack(side='left', padx=6)
-        ttk.Button(bar, text='停止 ANT+', command=self.stop_ant).pack(side='left')
+        ttk.Button(bar, text='启动 ANT USB 棒', command=self.start_ant).pack(side='left', padx=6)
+        ttk.Button(bar, text='停止 ANT USB 棒', command=self.stop_ant).pack(side='left')
         serial_bar = ttk.Frame(f)
         serial_bar.pack(fill='x', pady=(8, 0))
         ttk.Label(serial_bar, text='nRF52840 串口').pack(side='left')
@@ -50,7 +50,7 @@ class App:
         ttk.Button(serial_bar, text='连接串口', command=self.start_serial).pack(side='left', padx=6)
         ttk.Button(serial_bar, text='断开串口', command=self.stop_serial).pack(side='left')
         self.refresh_ports()
-        ttk.Label(f, text='BLE：选择设备后连接；ANT+：需要 ANT USB 接收器，启动后监听广播。').pack(anchor='w', pady=8)
+        ttk.Label(f, text='nRF52840 使用上方串口连接；ANT USB 棒按钮仅适用于独立 ANT USB 接收器。').pack(anchor='w', pady=8)
         cols = ('protocol', 'device', 'name', 'state', 'hr', 'cadence', 'power', 'updated')
         self.table = ttk.Treeview(f, columns=cols, show='headings', selectmode='browse')
         for c, label, width in zip(cols, ('协议', '地址 / 设备号', '名称 / 类型', '状态', '心率 bpm', '踏频 rpm', '功率 W', '最后更新'), (70, 200, 220, 115, 90, 90, 80, 100)):
@@ -193,7 +193,7 @@ class App:
                 node.start()
         except Exception as e:
             failed = True
-            self.emit('status', f'ANT+ 启动失败：{type(e).__name__}: {e}。请检查接收器和驱动。')
+            self.emit('status', f'ANT USB 棒启动失败：{type(e).__name__}: {e}。nRF52840 请使用串口连接。')
         finally:
             self.ant_node = None
             if node:
