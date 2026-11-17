@@ -33,9 +33,10 @@
 		buzzer-gpios = <&gpio0 23 GPIO_ACTIVE_HIGH>;
 		pmic-mode-gpios = <&gpio0 7 GPIO_ACTIVE_HIGH>;
 		pmic-iset-gpios = <&gpio0 8 GPIO_ACTIVE_HIGH>;
-		/* Raw pin references only: polarity and safe behavior unverified. */
-		bat-mon-en-pin = <6>;
-		power-off-pin = <22>;
+		/* Q1: high turns the switched divider on. */
+		bat-mon-en-gpios = <&gpio0 6 GPIO_ACTIVE_HIGH>;
+		/* GPIO_ACTIVE_HIGH describes physical level, not verified Ship polarity. */
+		power-off-gpios = <&gpio0 22 GPIO_ACTIVE_HIGH>;
 		io-channels = <&adc 0>;
 	};
 };

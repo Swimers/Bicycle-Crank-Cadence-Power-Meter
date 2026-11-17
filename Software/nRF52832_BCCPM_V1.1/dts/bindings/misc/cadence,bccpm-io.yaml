@@ -14,14 +14,14 @@ properties:
   pmic-iset-gpios:
     type: phandle-array
     required: true
-  bat-mon-en-pin:
-    type: int
+  bat-mon-en-gpios:
+    type: phandle-array
     required: true
-    description: Raw pin reference; enable polarity is not yet verified.
-  power-off-pin:
-    type: int
+    description: Switched battery divider enable, active high.
+  power-off-gpios:
+    type: phandle-array
     required: true
-    description: Raw pin reference; ship trigger polarity and timing are not yet verified.
+    description: Physical POWER_OFF GPIO; ship trigger polarity and timing are not yet verified.
   io-channels:
     type: phandle-array
     required: true
