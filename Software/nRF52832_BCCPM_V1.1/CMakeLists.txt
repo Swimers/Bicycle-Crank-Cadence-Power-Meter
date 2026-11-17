@@ -23,4 +23,5 @@ endif()
 
 project(nRF52832_BCCPM_V1.1)
 
-target_sources(app PRIVATE src/main.c)
+target_include_directories(app PRIVATE src)
+target_sources(app PRIVATE src/main.c src/drivers/lsm6dsr.c src/app/imu.c)

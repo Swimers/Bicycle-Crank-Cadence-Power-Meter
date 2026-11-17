@@ -17,3 +17,23 @@ GPIO output safe states are not initialized by the device tree or empty app.
 Verify SWD access, reset UICR programming, LF crystal, battery switch, ship
 sequence, bridge settling, ADC reference and sensor communications on hardware.
 No board UART or USB console is configured.
+
+## Six-axis sampling
+
+Include `app/imu.h`. Call `imu_init()` once in thread context, then call
+`imu_sample_read(&sample, timeout_ms)` whenever a fresh sample is needed.
+Both functions return zero on success or a negative errno; a zero timeout
+returns `-EAGAIN` when no sample is ready, while a positive timeout returns
+`-ETIMEDOUT`. Serialize calls from different threads. A failed read does not
+modify the output structure.
+
+The fixed profile is 104 Hz, +/-4 g and +/-1000 degrees/s; the returned XYZ
+axes are uncalibrated sensor-frame values in g and degrees/s. `timestamp_ms`
+is host uptime after the bus read, not a sensor timestamp. BDU protects each
+16-bit word but does not guarantee simultaneous six-axis measurements. Poll
+at an appropriate rate: this interface reads the latest outputs, not FIFO
+history, and cannot report samples missed between calls. The +/-1000 dps range
+can saturate above about 167 RPM for a perfectly aligned crank axis; validate
+the required range for the application. Interrupts, FIFO and calibration are
+not enabled. Hardware identity, startup settling and readings remain to be
+verified on the board.
