@@ -1,6 +1,7 @@
-#include <zephyr/kernel.h>
+#include "app/board_io.h"
 
 int main(void)
 {
-        return 0;
+	/* Initialize board functions before any sensor or bridge application. */
+	return board_io_init();
 }

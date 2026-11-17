@@ -5,7 +5,7 @@ properties:
   bridge-en-gpios:
     type: phandle-array
     required: true
-  buzzer-gpios:
+  pwms:
     type: phandle-array
     required: true
   pmic-mode-gpios:

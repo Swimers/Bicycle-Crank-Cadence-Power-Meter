@@ -19,4 +19,10 @@
 			low-power-enable;
 		};
 	};
+	bccpm_pwm0_default: bccpm_pwm0_default {
+		group1 { psels = <NRF_PSEL(PWM_OUT0, 0, 23)>; };
+	};
+	bccpm_pwm0_sleep: bccpm_pwm0_sleep {
+		group1 { psels = <NRF_PSEL(PWM_OUT0, 0, 23)>; low-power-enable; };
+	};
 };

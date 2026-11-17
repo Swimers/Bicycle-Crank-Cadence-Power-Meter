@@ -4,6 +4,7 @@
 #include <zephyr/dt-bindings/i2c/i2c.h>
 #include <zephyr/dt-bindings/adc/adc.h>
 #include <zephyr/dt-bindings/adc/nrf-saadc.h>
+#include <zephyr/dt-bindings/pwm/pwm.h>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 #include "bccpm_nrf52832-pinctrl.dtsi"
 
@@ -30,7 +31,7 @@
 	bccpm_io: board-io {
 		compatible = "cadence,bccpm-io";
 		bridge-en-gpios = <&gpio0 15 GPIO_ACTIVE_HIGH>;
-		buzzer-gpios = <&gpio0 23 GPIO_ACTIVE_HIGH>;
+		pwms = <&pwm0 0 PWM_USEC(250) PWM_POLARITY_NORMAL>;
 		pmic-mode-gpios = <&gpio0 7 GPIO_ACTIVE_HIGH>;
 		pmic-iset-gpios = <&gpio0 8 GPIO_ACTIVE_HIGH>;
 		/* Q1: high turns the switched divider on. */
@@ -45,6 +46,13 @@
 &gpiote { status = "okay"; };
 &uicr { gpio-as-nreset; };
 &uart0 { status = "disabled"; };
+
+&pwm0 {
+	status = "okay";
+	pinctrl-0 = <&bccpm_pwm0_default>;
+	pinctrl-1 = <&bccpm_pwm0_sleep>;
+	pinctrl-names = "default", "sleep";
+};
 
 &i2c0 {
 	compatible = "nordic,nrf-twim";

@@ -26,4 +26,4 @@ project(nRF52832_BCCPM_V1.1)
 target_include_directories(app PRIVATE src)
 target_sources(app PRIVATE src/main.c src/drivers/lsm6dsr.c src/app/imu.c
     src/drivers/ads1220.c src/app/bridge_adc.c
-    src/drivers/battery_adc.c src/app/power.c)
+    src/drivers/battery_adc.c src/app/power.c src/app/board_io.c)
