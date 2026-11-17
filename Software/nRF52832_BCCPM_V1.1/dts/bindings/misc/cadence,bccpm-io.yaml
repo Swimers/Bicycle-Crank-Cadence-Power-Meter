@@ -1,0 +1,27 @@
+description: BCCPM board control pins and battery ADC input.
+compatible: "cadence,bccpm-io"
+include: base.yaml
+properties:
+  bridge-en-gpios:
+    type: phandle-array
+    required: true
+  buzzer-gpios:
+    type: phandle-array
+    required: true
+  pmic-mode-gpios:
+    type: phandle-array
+    required: true
+  pmic-iset-gpios:
+    type: phandle-array
+    required: true
+  bat-mon-en-pin:
+    type: int
+    required: true
+    description: Raw pin reference; enable polarity is not yet verified.
+  power-off-pin:
+    type: int
+    required: true
+    description: Raw pin reference; ship trigger polarity and timing are not yet verified.
+  io-channels:
+    type: phandle-array
+    required: true

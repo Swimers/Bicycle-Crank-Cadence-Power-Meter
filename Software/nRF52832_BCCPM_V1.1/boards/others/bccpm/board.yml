@@ -1,0 +1,6 @@
+board:
+  name: bccpm
+  full_name: BCCPM V1.1 nRF52832
+  vendor: others
+  socs:
+    - name: nrf52832

@@ -1,0 +1,7 @@
+description: BCCPM ADS1220 wiring; no driver is supplied by this binding.
+compatible: "cadence,ads1220"
+include: spi-device.yaml
+properties:
+  drdy-gpios:
+    type: phandle-array
+    required: true

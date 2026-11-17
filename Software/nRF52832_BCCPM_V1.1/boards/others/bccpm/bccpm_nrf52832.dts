@@ -1,0 +1,91 @@
+/dts-v1/;
+#include <nordic/nrf52832_qfaa.dtsi>
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/i2c/i2c.h>
+#include <zephyr/dt-bindings/adc/adc.h>
+#include <zephyr/dt-bindings/adc/nrf-saadc.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+#include "bccpm_nrf52832-pinctrl.dtsi"
+
+/ {
+	model = "BCCPM V1.1 nRF52832";
+	compatible = "cadence,bccpm-v1-1";
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+	};
+
+	aliases {
+		sw0 = &user_button;
+	};
+
+	buttons {
+		compatible = "gpio-keys";
+		user_button: user-button {
+			gpios = <&gpio0 11 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			zephyr,code = <INPUT_KEY_0>;
+		};
+	};
+
+	bccpm_io: board-io {
+		compatible = "cadence,bccpm-io";
+		bridge-en-gpios = <&gpio0 15 GPIO_ACTIVE_HIGH>;
+		buzzer-gpios = <&gpio0 23 GPIO_ACTIVE_HIGH>;
+		pmic-mode-gpios = <&gpio0 7 GPIO_ACTIVE_HIGH>;
+		pmic-iset-gpios = <&gpio0 8 GPIO_ACTIVE_HIGH>;
+		/* Raw pin references only: polarity and safe behavior unverified. */
+		bat-mon-en-pin = <6>;
+		power-off-pin = <22>;
+		io-channels = <&adc 0>;
+	};
+};
+
+&gpio0 { status = "okay"; };
+&gpiote { status = "okay"; };
+&uicr { gpio-as-nreset; };
+&uart0 { status = "disabled"; };
+
+&i2c0 {
+	compatible = "nordic,nrf-twim";
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+	pinctrl-0 = <&bccpm_i2c0_default>;
+	pinctrl-1 = <&bccpm_i2c0_sleep>;
+	pinctrl-names = "default", "sleep";
+	imu: imu@6a {
+		compatible = "cadence,lsm6dsr";
+		reg = <0x6a>;
+		int1-gpios = <&gpio0 28 GPIO_ACTIVE_HIGH>;
+		int2-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&spi1 {
+	compatible = "nordic,nrf-spim";
+	status = "okay";
+	pinctrl-0 = <&bccpm_spi1_default>;
+	pinctrl-1 = <&bccpm_spi1_sleep>;
+	pinctrl-names = "default", "sleep";
+	cs-gpios = <&gpio0 19 GPIO_ACTIVE_LOW>;
+	ads1220: adc@0 {
+		compatible = "cadence,ads1220";
+		reg = <0>;
+		spi-max-frequency = <1000000>;
+		spi-cpha;
+		drdy-gpios = <&gpio0 20 GPIO_ACTIVE_LOW>;
+	};
+};
+
+&adc {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	channel@0 {
+		reg = <0>;
+		zephyr,gain = "ADC_GAIN_1_6";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 40)>;
+		zephyr,input-positive = <NRF_SAADC_AIN0>;
+		zephyr,resolution = <12>;
+	};
+};

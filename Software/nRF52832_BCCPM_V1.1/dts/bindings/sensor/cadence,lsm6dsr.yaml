@@ -1,0 +1,10 @@
+description: BCCPM LSM6DSR wiring; no driver is supplied by this binding.
+compatible: "cadence,lsm6dsr"
+include: i2c-device.yaml
+properties:
+  int1-gpios:
+    type: phandle-array
+    required: true
+  int2-gpios:
+    type: phandle-array
+    required: true

@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.20.0)
+list(APPEND BOARD_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+list(APPEND DTS_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+if(NOT DEFINED BOARD)
+  set(BOARD bccpm/nrf52832 CACHE STRING "Target board")
+endif()
+
 # Match the ANT add-on used by the existing nRF52832 project. Override the
 # path through the environment or CMake cache when installed elsewhere.
 set(CADENCE_ANT_MODULE_DIR "D:/ncs/ant-v2.1.1/ant" CACHE PATH "sdk-ant v2.1.1 module")

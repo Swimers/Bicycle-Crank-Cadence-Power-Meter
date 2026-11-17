@@ -1,0 +1,2 @@
+config BOARD_BCCPM
+	select SOC_NRF52832_QFAA
