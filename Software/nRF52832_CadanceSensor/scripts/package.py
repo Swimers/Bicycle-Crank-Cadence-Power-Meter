@@ -14,9 +14,8 @@ required = {
     "ble_loader": ["CONFIG_MCUMGR=y", "CONFIG_ZCBOR=y", "CONFIG_MCUMGR_TRANSPORT_BT=y",
                    "CONFIG_MCUBOOT_APPLICATION_FIRMWARE_UPDATER=y",
                    "CONFIG_MCUMGR_SMP_COMMAND_STATUS_HOOKS=y", "CONFIG_FPROTECT=y"],
-    application: ["CONFIG_BOOTLOADER_MCUBOOT=y", "CONFIG_RETENTION_BOOT_MODE=y",
-                  "CONFIG_ANT=y", "CONFIG_BT=y", "CONFIG_I2C_NRFX_TWIM=y",
-                  "CONFIG_UART_BT=y", "CONFIG_UART_CONSOLE=y",
+    application: ["CONFIG_BOOTLOADER_MCUBOOT=y", "CONFIG_ANT=y", "CONFIG_ANT_BSC=y",
+                  "CONFIG_I2C_NRFX_TWIM=y",
                   "CONFIG_SPI_NRFX_SPIM=y", "CONFIG_ADC_NRFX_SAADC=y", "CONFIG_PWM_NRFX=y",
                   "CONFIG_ANT_TOTAL_CHANNELS_ALLOCATED=1"],
 }
@@ -33,6 +32,8 @@ for name, settings in required.items():
             raise RuntimeError(f"{name}: missing effective setting {setting}")
     if name != application and "CONFIG_ANT=y" in config:
         raise RuntimeError(f"{name}: ANT must only be enabled in the business image")
+    if name == application and "CONFIG_BT=y" in config:
+        raise RuntimeError(f"{name}: Bluetooth must be disabled in the business image")
     values = dict(line.split("=", 1) for line in config if line.startswith("CONFIG_") and "=" in line)
     offset, capacity = partitions[name]
     if (int(values["CONFIG_FLASH_LOAD_OFFSET"], 0),

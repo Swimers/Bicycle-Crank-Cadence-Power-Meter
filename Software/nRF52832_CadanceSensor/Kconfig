@@ -1,7 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-
-source "Kconfig.zephyr"
-
-# NCS 3.2.4's NUS UART does not advertise itself as a serial console driver.
-config UART_BT
-	select SERIAL_HAS_DRIVER

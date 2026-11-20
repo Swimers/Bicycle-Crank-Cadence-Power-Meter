@@ -1,30 +1,38 @@
+#include <zephyr/drivers/pwm.h>
 #include <zephyr/kernel.h>
-#include <zephyr/sys/printk.h>
 
 #include "app/ant_app.h"
-#include "app/bluetooth_app.h"
 #include "app/sc7a20h_app.h"
+
+static const struct pwm_dt_spec buzzer = PWM_DT_SPEC_GET(DT_PATH(zephyr_user));
+
+static void indicate_power_on(void)
+{
+	if (!pwm_is_ready_dt(&buzzer)) {
+		return;
+	}
+
+	for (int beep = 0; beep < 2; beep++) {
+		if (beep != 0) {
+			k_msleep(100);
+		}
+		if (pwm_set_pulse_dt(&buzzer, buzzer.period / 2U) != 0) {
+			return;
+		}
+		k_msleep(100);
+		if (pwm_set_pulse_dt(&buzzer, 0) != 0) {
+			return;
+		}
+	}
+}
 
 int main(void)
 {
-	/* Official multiprotocol example initializes ANT before enabling BLE. */
-	int ant_error = ant_app_init(&ant_app_default_channel_config);
+	int err = ant_app_init();
 
-	if (bluetooth_app_init() != 0) {
-		return 0;
+	if (err == 0) {
+		sc7a20h_app_start();
 	}
-	if (ant_error != 0) {
-		printk("ANT initialization failed / unavailable (%d); BLE remains active\n", ant_error);
-	} else {
-		printk("ANT Bicycle Power started: fixed %u W, %u rpm; BLE active\n",
-		       ANT_APP_FIXED_POWER_WATTS, ANT_APP_FIXED_CADENCE_RPM);
-	}
-	sc7a20h_app_start();
-
-	while (true) {
-		sc7a20h_app_process();
-		bluetooth_app_process();
-		ant_app_process();
-		k_sleep(K_MSEC(20));
-	}
+	indicate_power_on();
+	return err;
 }

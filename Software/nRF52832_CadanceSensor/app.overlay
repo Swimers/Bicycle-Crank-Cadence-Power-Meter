@@ -1,17 +1,4 @@
-/* Application transport only. Physical wiring belongs to the board DTS. */
-/ {
-	chosen {
-		zephyr,bt-hci = &bt_hci_sdc;
-		zephyr,console = &bt_console;
-	};
-
-	bt_console: bt-console {
-		compatible = "zephyr,nus-uart";
-		tx-fifo-size = <2048>;
-		rx-fifo-size = <512>;
-	};
+/* Disable the BLE controller in the ANT-only application image. */
+&bt_hci_sdc {
+	status = "disabled";
 };
-
-&radio { status = "okay"; };
-&bt_hci_sdc { status = "okay"; };
-&bt_hci_controller { status = "disabled"; };
