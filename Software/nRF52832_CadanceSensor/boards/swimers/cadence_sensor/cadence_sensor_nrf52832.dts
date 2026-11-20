@@ -9,6 +9,7 @@
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 #include <zephyr/dt-bindings/pwm/pwm.h>
 #include "cadence_sensor_nrf52832-pinctrl.dtsi"
+#include "cadence_sensor_partitions.dtsi"
 
 / {
 	model = "Cadence Sensor V1.0 (nRF52832-QFAA)";
@@ -17,10 +18,14 @@
 	chosen {
 		zephyr,sram = &sram0;
 		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+		zephyr,boot-mode = &boot_mode0;
 	};
 
 	aliases {
 		sw0 = &user_button;
+		mcuboot-button0 = &user_button;
+		accel0 = &sc7a20h;
 	};
 
 	buttons {
@@ -33,16 +38,6 @@
 	};
 
 	zephyr,user {
-		sc7a20h-i2c = <&i2c0>;
-		sc7a20h-address = <0x19>;
-		/* Match the interrupt polarity selected in the sensor. */
-		sc7a20h-int1-gpios = <&gpio0 13 0>;
-
-		ads1220-spi = <&spi1>;
-		ads1220-spi-max-frequency = <DT_FREQ_M(1)>;
-		ads1220-spi-cpha;
-		ads1220-drdy-gpios = <&gpio0 20 GPIO_ACTIVE_LOW>;
-
 		io-channels = <&adc 0>;
 		bat-mon-full-ohms = <1720000>;
 		bat-mon-output-ohms = <220000>;
@@ -74,6 +69,12 @@
 	pinctrl-0 = <&i2c0_default>;
 	pinctrl-1 = <&i2c0_sleep>;
 	pinctrl-names = "default", "sleep";
+
+	sc7a20h: accelerometer@19 {
+		compatible = "silan,sc7a20h";
+		reg = <0x19>;
+		int1-gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+	};
 };
 
 &spi1 {
@@ -83,6 +84,14 @@
 	pinctrl-0 = <&spi1_default>;
 	pinctrl-1 = <&spi1_sleep>;
 	pinctrl-names = "default", "sleep";
+
+	ads1220: adc@0 {
+		compatible = "ti,ads1220";
+		reg = <0>;
+		spi-max-frequency = <DT_FREQ_M(1)>;
+		spi-cpha;
+		drdy-gpios = <&gpio0 20 GPIO_ACTIVE_LOW>;
+	};
 };
 
 &pwm0 {

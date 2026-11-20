@@ -1,0 +1,17 @@
+/* Application transport only. Physical wiring belongs to the board DTS. */
+/ {
+	chosen {
+		zephyr,bt-hci = &bt_hci_sdc;
+		zephyr,console = &bt_console;
+	};
+
+	bt_console: bt-console {
+		compatible = "zephyr,nus-uart";
+		tx-fifo-size = <2048>;
+		rx-fifo-size = <512>;
+	};
+};
+
+&radio { status = "okay"; };
+&bt_hci_sdc { status = "okay"; };
+&bt_hci_controller { status = "disabled"; };
