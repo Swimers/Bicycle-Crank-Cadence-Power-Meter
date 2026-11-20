@@ -1,0 +1,6 @@
+board:
+  name: cadence_sensor
+  full_name: Cadence Sensor
+  vendor: swimers
+  socs:
+    - name: nrf52832
