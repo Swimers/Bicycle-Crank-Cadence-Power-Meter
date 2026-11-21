@@ -17,6 +17,7 @@ target_include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_sources(app PRIVATE
     src/main.c
     src/app/ble_csc.c
+    src/app/ble_dfu.c
     src/app/cadence_estimator.c
     src/app/sc7a20h_app.c
     src/drivers/sc7a20h.c

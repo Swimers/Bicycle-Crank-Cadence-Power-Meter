@@ -23,4 +23,8 @@ $ncsPython = 'C:/ncs/toolchains/fd21892d0f/opt/bin/python.exe'
 
 MCUboot 位于 `0x00000`，业务槽位于 `0x10000`，常驻 Loader 位于 `0x4C000`，参数区位于 `0x7C000`。按住 SW5 并复位可手动进入 Loader。业务镜像无效时，MCUboot 自动进入 Loader。
 
+运行新版业务固件时，可用 [BLE OTA 工具](../../Tools/BLE_OTA/README.md) 的“进入 Loader”按钮，或执行 `python ota.py enter --address <设备地址>`。设备只支持一个 BLE 连接，操作前先断开码表等正在连接的设备。
+
+从通用 GATT 客户端操作时，连接 `CadenceSensor`，在升级服务 `85b8f1a0-c8ed-4be7-a48f-47d72e308066` 的控制特征 `85b8f1a1-c8ed-4be7-a48f-47d72e308066` 中，用 **Write Request（有响应写入）**发送完整 ASCII 字符串 `OTA ENTER`，不带换行。写入成功后约 500 ms 重启。该特征无需配对，已连接的客户端可发起请求。
+
 Loader 以 `CadenceDFU` 广播 SMP，上传 `build/nRF52832_CadanceSensor/zephyr/zephyr.signed.bin` 后复位。系统覆盖单一业务槽，MCUboot 在启动业务前校验签名。当前构建使用 SDK 开发签名密钥。

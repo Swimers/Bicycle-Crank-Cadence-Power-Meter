@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock
 
 import cbor2
 
-from ota import SMP, NUS_RX, SmpClient
-from ota_backend import OtaBackend, SLOT_SIZE, load_firmware
+from ota import DFU_CONTROL, SMP, NUS_RX, SmpClient
+from ota_backend import CSC_FEATURE, OtaBackend, SLOT_SIZE, load_firmware
 
 
 def signed_image():
@@ -150,6 +150,22 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(app.is_connected)
         self.assertFalse(loader.is_connected)
 
+    async def test_gatt_entry_writes_with_response_and_confirms_same_target(self):
+        backend = OtaBackend(lambda *_: None)
+        app, loader = FakeClient(loader=False), FakeClient()
+        control = object()
+        app.get_characteristic = lambda uuid: control if uuid == DFU_CONTROL else None
+        app.write_gatt_char = AsyncMock()
+        backend.connect = AsyncMock(return_value=app)
+        backend.wait_loader = AsyncMock(return_value=loader)
+
+        await backend.enter("explicit-target")
+
+        app.write_gatt_char.assert_awaited_once_with(control, b"OTA ENTER", response=True)
+        backend.wait_loader.assert_awaited_once_with("explicit-target")
+        self.assertFalse(app.is_connected)
+        self.assertFalse(loader.is_connected)
+
     async def test_reset_and_verify_app_separate_from_upload(self):
         from types import SimpleNamespace
         from unittest.mock import patch
@@ -169,6 +185,17 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn("已返回业务模式", result)
             self.assertIn(("phase", "核对业务启动"), events)
         self.assertFalse(loader.is_connected)
+        self.assertFalse(app.is_connected)
+
+    async def test_csc_application_is_recognized_without_nus(self):
+        backend = OtaBackend(lambda *_: None)
+        app = FakeClient(loader=False)
+        app.get_characteristic = lambda uuid: app if uuid == CSC_FEATURE else None
+        backend.connect = AsyncMock(return_value=app)
+        backend.nus = AsyncMock()
+
+        self.assertEqual(await backend.inspect("explicit-target"), "业务 / CSC")
+        backend.nus.assert_not_awaited()
         self.assertFalse(app.is_connected)
 
 

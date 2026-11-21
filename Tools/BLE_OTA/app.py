@@ -97,7 +97,7 @@ class OtaWindow:
         row.pack(fill="x", pady=(12, 6))
         self.auto_check = ttk.Checkbutton(row, text="自动从业务模式进入 Loader", variable=self.auto_enter)
         self.auto_check.pack(side="left")
-        self.reset_check = ttk.Checkbutton(row, text="上传后复位并查询业务版本", variable=self.reset)
+        self.reset_check = ttk.Checkbutton(row, text="上传后复位并确认业务启动", variable=self.reset)
         self.reset_check.pack(side="left", padx=20)
         ttk.Label(panel, text="单业务槽：上传会覆盖原固件，无回滚。中断后请进入 Loader，重新上传完整签名 BIN。", foreground="#9b4a13", wraplength=970).pack(anchor="w", pady=(2, 12))
         row = ttk.Frame(panel)

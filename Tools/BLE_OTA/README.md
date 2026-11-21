@@ -1,10 +1,12 @@
 # CadenceSensor BLE OTA 工具
 
-`ota.py` 使用 Bleak + cbor2，通过 NUS 进入独立 Loader，再通过 SMP over BLE 覆盖业务镜像。所有设备操作必须显式指定 `--address`。
+`ota.py` 使用 Bleak + cbor2。新版踏频固件通过 GATT 控制特征进入独立 Loader，旧版 Demo 使用 NUS 入口。Loader 通过 SMP over BLE 覆盖业务镜像。命令行设备操作需显式指定 `--address`。
 
 安装依赖：`python -m pip install -r requirements.txt`。本机已在 `Tools/BLE_NUS/.venv` 中验证。
 
 常用命令：`scan`、`nus`（默认发送 VERSION）、`enter`、`status`、`upload --image <签名BIN> --reset`、`reset`。详见 `python ota.py --help`。
+
+首次升级此前只有 CSC 服务的固件时，按住 SW5 并复位进入 Loader。升级完成后即可使用 `enter --address <设备地址>`，随后用 `status --address <设备地址>` 确认已进入 Loader。
 
 `--stop-after` 故意中断唯一业务镜像的上传，仅供恢复测试；不保证业务镜像仍可运行。`check-erase-guard` 和 `check-oversize --image <签名BIN>` 用于检查 Loader 的拒绝行为。
 
@@ -21,9 +23,9 @@
 
 1. 扫描并选择明确的目标地址，也可手工输入。业务设备通常叫 CadenceSensor，Loader 叫 CadenceDFU。
 2. 点击“查询版本 / 状态”确认目标；软件每次操作建立连接，完成后自动断开。
-3. 选择 `Software/nRF52832_Demo/build/nRF52832_Demo/zephyr/zephyr.signed.bin`。显示镜像版本、大小、完整文件 SHA-256。
-4. 保持“自动从业务模式进入 Loader”和“上传后复位并查询业务版本”勾选，点击开始并确认目标。
-5. 观察进入 Loader、上传、复位、业务版本查询各阶段及字节数、速度和预计剩余时间。
+3. 选择 `Software/nRF52832_CadanceSensor/build/nRF52832_CadanceSensor/zephyr/zephyr.signed.bin`。界面显示镜像版本、大小和完整文件 SHA-256。
+4. 勾选“自动从业务模式进入 Loader”和“上传后复位并确认业务启动”，点击开始并确认目标。
+5. 观察进入 Loader、上传、复位、业务启动核对各阶段及字节数、速度和预计剩余时间。
    100% 仅表示传输完成；业务启动核对和签名验证是另外的步骤。最终签名由 MCUboot 验证。
 
 设备已在 Loader 时可以直接上传；单独“进入 Loader”和“Loader 复位”用于分步调试。

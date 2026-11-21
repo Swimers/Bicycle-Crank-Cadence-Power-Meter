@@ -1,4 +1,4 @@
-"""CadenceSensor NUS entry and MCUboot firmware-loader SMP client.
+"""CadenceSensor GATT entry and MCUboot firmware-loader SMP client.
 
 Always specify the target address; uploads overwrite the only business image.
 """
@@ -15,6 +15,15 @@ from bleak import BleakClient, BleakScanner
 SMP = "da2e7828-fbce-4e01-ae9e-261174997c48"
 NUS_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 NUS_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
+DFU_CONTROL = "85b8f1a1-c8ed-4be7-a48f-47d72e308066"
+
+
+async def request_gatt_dfu(client):
+    control = client.services.get_characteristic(DFU_CONTROL)
+    if control is None:
+        return False
+    await client.write_gatt_char(control, b"OTA ENTER", response=True)
+    return True
 
 
 class SmpClient:
@@ -103,7 +112,16 @@ async def run(args):
     if device is None:
         raise RuntimeError(f"Target {args.address} not advertising")
     async with BleakClient(device, pair=False, winrt={"use_cached_services": False}) as client:
+        if args.command == "enter":
+            if client.services.get_characteristic(SMP):
+                print("Target is already in Loader mode")
+                return
+            if await request_gatt_dfu(client):
+                print("DFU request acknowledged. Run status after the device restarts.")
+                return
         if args.command in ("nus", "enter"):
+            if client.services.get_characteristic(NUS_RX) is None:
+                raise RuntimeError("Target has no DFU entry characteristic or NUS. Hold SW5 and reset.")
             await client.start_notify(NUS_TX, lambda _, data: print(
                 data.decode("utf-8", errors="replace"), end="", flush=True))
             await asyncio.sleep(1)

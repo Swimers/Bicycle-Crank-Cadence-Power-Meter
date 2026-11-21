@@ -8,8 +8,9 @@ from pathlib import Path
 
 from bleak import BleakClient, BleakScanner
 
-from ota import NUS_RX, NUS_TX, SMP, SmpClient, printable
+from ota import NUS_RX, NUS_TX, SMP, SmpClient, printable, request_gatt_dfu
 
+CSC_FEATURE = "00002a5c-0000-1000-8000-00805f9b34fb"
 NUS_SERVICE = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
 SMP_SERVICE = "8d53dc1d-1db7-4cd3-868b-8a527460aa84"
 SLOT_SIZE = 0x3C000  # Current board's 240 KiB business slot, not Loader slot1.
@@ -131,20 +132,34 @@ class OtaBackend:
                 self.emit("log", "BOOTLOADER " + printable(await smp.request(0, 0, 8, {"query": "mode"})))
                 self.emit("log", "IMAGES " + printable(await smp.request(0, 1, 0, {})))
                 return "Loader / SMP"
+            if client.services.get_characteristic(CSC_FEATURE):
+                self.emit("log", "已连接 CadenceSensor，CSC 踏频服务在线。")
+                return "业务 / CSC"
             await self.nus(client, "VERSION")
             return "业务 / NUS"
         finally:
             await self.disconnect(client)
+
+    async def request_entry(self, client):
+        if await request_gatt_dfu(client):
+            self.emit("log", "设备已确认 GATT 升级请求，即将重启。")
+            return
+        if client.services.get_characteristic(NUS_RX) is None:
+            raise RuntimeError("当前固件没有远程升级入口，请按住 SW5 并复位。")
+        await self.nus(client, "OTA ENTER")
 
     async def enter(self, address):
         client = await self.connect(address)
         try:
             if client.services.get_characteristic(SMP):
                 self.emit("log", "设备已在 Loader 模式。")
-            else:
-                await self.nus(client, "OTA ENTER")
+                return
+            await self.request_entry(client)
         finally:
             await self.disconnect(client)
+        loader = await self.wait_loader(address)
+        await self.disconnect(loader)
+        self.emit("log", "已确认设备进入 CadenceDFU。")
 
     async def wait_loader(self, address):
         deadline = time.monotonic() + 45
@@ -178,7 +193,7 @@ class OtaBackend:
                 if not auto_enter:
                     raise RuntimeError("当前为业务模式，请先进入 Loader 或勾选自动进入。")
                 self.emit("phase", "进入 Loader")
-                await self.nus(client, "OTA ENTER")
+                await self.request_entry(client)
                 await self.disconnect(client)
                 client = None
                 await asyncio.sleep(1)
@@ -210,6 +225,8 @@ class OtaBackend:
             client = None
             try:
                 client = await self.connect(address, timeout=3)
+                if client.services.get_characteristic(CSC_FEATURE):
+                    return "上传完成，设备已返回业务模式，CSC 踏频服务在线。"
                 if client.services.get_characteristic(NUS_RX):
                     text = await self.nus(client, "VERSION")
                     if "CadenceSensor firmware " in text:
