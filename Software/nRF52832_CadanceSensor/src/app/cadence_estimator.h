@@ -18,13 +18,15 @@ struct cadence_estimator {
 	struct cadence_axis axes[CADENCE_AXIS_COUNT];
 	uint64_t last_sample_ms;
 	uint64_t last_event_ms;
+	int32_t filtered_period;
+	int32_t event_delay_ms;
 	uint8_t active_axis;
 	bool initialized;
 };
 
-/* Initialize the estimator to zero. True means a confirmed revolution at time_ms. */
+/* Initialize to zero. On true, event_time_ms holds the estimated time of one revolution. */
 bool cadence_estimator_update(struct cadence_estimator *estimator,
 			      const int32_t acceleration_mg[CADENCE_AXIS_COUNT],
-			      uint64_t time_ms);
+			      uint64_t time_ms, uint64_t *event_time_ms);
 
 #endif

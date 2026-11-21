@@ -24,6 +24,7 @@ static void sample_thread(void *p1, void *p2, void *p3)
 
 			for (;;) {
 				struct sc7a20h_sample sample;
+				uint64_t event_time_ms;
 
 				/* The 100 Hz sensor supplies new samples when XYZ is ready. */
 				k_msleep(5);
@@ -38,8 +39,9 @@ static void sample_thread(void *p1, void *p2, void *p3)
 				}
 
 				last_sample = now;
-				if (cadence_estimator_update(&estimator, sample.mg, (uint64_t)now)) {
-					ble_csc_record_revolution((uint64_t)now);
+				if (cadence_estimator_update(&estimator, sample.mg, (uint64_t)now,
+							     &event_time_ms)) {
+					ble_csc_record_revolution(event_time_ms);
 				}
 			}
 		}
