@@ -13,6 +13,7 @@
 #define BOARD_IO DT_PATH(zephyr_user)
 #define DIVIDER_FULL_OHMS DT_PROP(BOARD_IO, bat_mon_full_ohms)
 #define DIVIDER_OUTPUT_OHMS DT_PROP(BOARD_IO, bat_mon_output_ohms)
+#define DIVIDER_SWITCH_DROP_MV DT_PROP_OR(BOARD_IO, bat_mon_switch_drop_mv, 0)
 #define BATTERY_SETTLE_MS 150
 #define BATTERY_SAMPLE_COUNT 8
 #define BATTERY_SAMPLE_INTERVAL_US 1000
@@ -129,13 +130,16 @@ int battery_sample(void)
 	if (err != 0) {
 		return err;
 	}
-	int32_t mv = DIV_ROUND_CLOSEST((int64_t)input_uv * DIVIDER_FULL_OHMS,
-				      (int64_t)DIVIDER_OUTPUT_OHMS * 1000);
-	if (mv < MIN_VALID_BATTERY_MV || mv > MAX_VALID_BATTERY_MV) {
+	int32_t switched_mv = DIV_ROUND_CLOSEST((int64_t)input_uv * DIVIDER_FULL_OHMS,
+					       (int64_t)DIVIDER_OUTPUT_OHMS * 1000);
+	int32_t battery_mv = switched_mv + DIVIDER_SWITCH_DROP_MV;
+
+	/* Check the physical input as well so compensation cannot mask an open divider. */
+	if (switched_mv < MIN_VALID_BATTERY_MV || battery_mv > MAX_VALID_BATTERY_MV) {
 		return -ERANGE;
 	}
 
-	uint8_t level = estimate_percent(mv);
+	uint8_t level = estimate_percent(battery_mv);
 
 	atomic_set(&battery_level, level);
 	if (bt_is_ready()) {

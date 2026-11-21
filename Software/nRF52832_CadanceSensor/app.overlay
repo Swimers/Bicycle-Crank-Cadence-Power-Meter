@@ -1,3 +1,8 @@
+&{/zephyr,user} {
+	/* Measured on this board: BAT+ 4.02 V, switched divider supply 3.53 V. */
+	bat-mon-switch-drop-mv = <490>;
+};
+
 &bt_hci_sdc {
 	status = "okay";
 };
