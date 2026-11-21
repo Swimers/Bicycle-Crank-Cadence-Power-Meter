@@ -41,11 +41,11 @@
 		io-channels = <&adc 0>;
 		bat-mon-full-ohms = <1720000>;
 		bat-mon-output-ohms = <220000>;
-		/* Use raw levels for these control lines until verified on hardware. */
-		bat-mon-en-gpios = <&gpio0 6 0>;
+		bat-mon-en-gpios = <&gpio0 6 GPIO_ACTIVE_HIGH>;
+		/* MODE and ISET retain raw level flags. */
 		pmic-mode-gpios = <&gpio0 7 0>;
 		pmic-iset-gpios = <&gpio0 8 0>;
-		pmic-power-off-gpios = <&gpio0 22 0>;
+		pmic-power-off-gpios = <&gpio0 22 GPIO_ACTIVE_HIGH>;
 
 		pwms = <&pwm0 0 PWM_USEC(250) PWM_POLARITY_NORMAL>;
 	};

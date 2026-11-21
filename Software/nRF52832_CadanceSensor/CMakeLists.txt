@@ -18,6 +18,7 @@ target_sources(app PRIVATE
     src/main.c
     src/app/ble_csc.c
     src/app/ble_dfu.c
+    src/app/battery.c
     src/app/cadence_estimator.c
     src/app/sc7a20h_app.c
     src/drivers/sc7a20h.c
