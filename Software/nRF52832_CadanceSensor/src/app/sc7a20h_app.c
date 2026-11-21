@@ -1,5 +1,5 @@
 #include "sc7a20h_app.h"
-#include "ant_app.h"
+#include "ble_csc.h"
 #include "cadence_estimator.h"
 #include "drivers/sc7a20h.h"
 
@@ -39,12 +39,12 @@ static void sample_thread(void *p1, void *p2, void *p3)
 
 				last_sample = now;
 				if (cadence_estimator_update(&estimator, sample.mg, (uint64_t)now)) {
-					ant_app_record_revolution((uint64_t)now);
+					ble_csc_record_revolution((uint64_t)now);
 				}
 			}
 		}
 
-		/* Keep the last ANT event while the sensor is unavailable. */
+		/* Keep the last confirmed event while the sensor recovers. */
 		k_msleep(2000);
 	}
 }

@@ -10,6 +10,6 @@ add_custom_target(cadence_package ALL
     COMMAND "${Python3_EXECUTABLE}" "${APP_DIR}/scripts/package.py"
             "${CMAKE_BINARY_DIR}" "${DEFAULT_IMAGE}"
     DEPENDS ${DEFAULT_IMAGE} mcuboot ble_loader
-    COMMENT "Validating ANT/BLE/OTA images and merging HEX"
+    COMMENT "Validating BLE/OTA images and merging HEX"
     VERBATIM
 )

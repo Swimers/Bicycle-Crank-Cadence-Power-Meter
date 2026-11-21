@@ -1,4 +1,3 @@
-/* Disable the BLE controller in the ANT-only application image. */
 &bt_hci_sdc {
-	status = "disabled";
+	status = "okay";
 };
