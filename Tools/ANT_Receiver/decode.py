@@ -1,20 +1,25 @@
 import struct
+import time
 
 
 class Decoder:
     def __init__(self):
         self.previous = {}
 
+    def reset_device(self, device):
+        self.previous = {key: value for key, value in self.previous.items() if key[0] != device}
+
     def crank(self, key, rev, stamp):
+        now = time.monotonic()
         old = self.previous.get(key)
-        if old is None:
-            self.previous[key] = (rev, stamp)
+        if old is None or now - old[2] >= 60:
+            self.previous[key] = (rev, stamp, now)
             return {}
         dr = (rev - old[0]) & 0xffff
         dt = (stamp - old[1]) & 0xffff
         if not dr:
-            return {}
-        self.previous[key] = (rev, stamp)
+            return {'cadence': 0} if now - old[2] >= 3 else {}
+        self.previous[key] = (rev, stamp, now)
         return {'cadence': 60 * 1024 * dr / dt} if dt else {}
 
     def ble(self, key, kind, data):

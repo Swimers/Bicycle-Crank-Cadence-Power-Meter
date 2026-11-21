@@ -1,9 +1,12 @@
 import asyncio
 import json
+import math
 import queue
 import struct
 import threading
+import time
 import tkinter as tk
+from collections import deque
 from tkinter import ttk
 from datetime import datetime
 from bleak import BleakClient, BleakScanner
@@ -12,6 +15,7 @@ from decode import Decoder
 CHARS = {'00002a37-0000-1000-8000-00805f9b34fb': 'hr',
          '00002a5b-0000-1000-8000-00805f9b34fb': 'csc',
          '00002a63-0000-1000-8000-00805f9b34fb': 'power'}
+BATTERY_LEVEL_UUID = '00002a19-0000-1000-8000-00805f9b34fb'
 
 
 class App:
@@ -23,6 +27,7 @@ class App:
         self.thread.start()
         self.decoder = Decoder()
         self.devices, self.clients = {}, {}
+        self.cadence_history = {}
         self.ant_node = None
         self.ant_thread = None
         self.serial_thread = None
@@ -30,7 +35,7 @@ class App:
         self.stop_requested = threading.Event()
         self.closing = False
         root.title('BLE / ANT+ 多设备监测')
-        root.geometry('1060x650')
+        root.geometry('1060x820')
         f = ttk.Frame(root, padding=12)
         f.pack(fill='both', expand=True)
         bar = ttk.Frame(f)
@@ -51,12 +56,17 @@ class App:
         ttk.Button(serial_bar, text='断开串口', command=self.stop_serial).pack(side='left')
         self.refresh_ports()
         ttk.Label(f, text='nRF52840 使用上方串口连接；ANT USB 棒按钮仅适用于独立 ANT USB 接收器。').pack(anchor='w', pady=8)
-        cols = ('protocol', 'device', 'name', 'state', 'hr', 'cadence', 'power', 'updated')
+        cols = ('protocol', 'device', 'name', 'state', 'hr', 'cadence', 'power', 'battery', 'updated')
         self.table = ttk.Treeview(f, columns=cols, show='headings', selectmode='browse')
-        for c, label, width in zip(cols, ('协议', '地址 / 设备号', '名称 / 类型', '状态', '心率 bpm', '踏频 rpm', '功率 W', '最后更新'), (70, 200, 220, 115, 90, 90, 80, 100)):
+        for c, label, width in zip(cols, ('协议', '地址 / 设备号', '名称 / 类型', '状态', '心率 bpm', '踏频 rpm', '功率 W', '电量', '最后更新'), (70, 180, 180, 110, 85, 85, 75, 65, 90)):
             self.table.heading(c, text=label)
             self.table.column(c, width=width)
         self.table.pack(fill='both', expand=True)
+        ttk.Label(f, text='所选设备踏频曲线（最近 60 秒，rpm）').pack(anchor='w', pady=(8, 2))
+        self.chart = tk.Canvas(f, height=190, background='white', highlightthickness=1, highlightbackground='#cccccc')
+        self.chart.pack(fill='x')
+        self.table.bind('<<TreeviewSelect>>', lambda event: self.draw_cadence())
+        self.chart.bind('<Configure>', lambda event: self.draw_cadence())
         ttk.Label(f, text='原始数据：BLE 为 GATT 特征值，ANT+ 为广播数据页').pack(anchor='w', pady=(8, 2))
         self.log = tk.Text(f, height=9, state='disabled', wrap='word')
         self.log.pack(fill='x')
@@ -64,6 +74,7 @@ class App:
         ttk.Label(f, textvariable=self.status).pack(anchor='w', pady=4)
         root.protocol('WM_DELETE_WINDOW', self.close)
         root.after(50, self.poll)
+        root.after(1000, self.refresh_chart)
 
     def run_loop(self):
         asyncio.set_event_loop(self.loop)
@@ -121,14 +132,35 @@ class App:
                 self.emit('state', key, '连接中')
                 await client.connect()
                 count = 0
+                battery_char = None
                 for service in client.services:
                     for char in service.characteristics:
+                        if char.uuid.lower() == BATTERY_LEVEL_UUID:
+                            battery_char = char
                         kind = CHARS.get(char.uuid.lower())
                         if kind and 'notify' in char.properties:
                             await client.start_notify(char, lambda _, data, k=key, t=kind: self.emit('measurement', 'BLE', k, t, bytes(data)))
                             count += 1
                 if not count:
                     raise RuntimeError('未发现心率、踏频或功率通知特征')
+                if battery_char:
+                    battery_notified = False
+                    def battery_changed(_, data):
+                        nonlocal battery_notified
+                        battery_notified = True
+                        self.emit('battery', key, bytes(data))
+                    if 'notify' in battery_char.properties:
+                        try:
+                            await client.start_notify(battery_char, battery_changed)
+                        except Exception as e:
+                            self.emit('status', f'电量通知订阅失败：{e}')
+                    if 'read' in battery_char.properties:
+                        try:
+                            data = await client.read_gatt_char(battery_char)
+                            if not battery_notified:
+                                self.emit('battery', key, bytes(data))
+                        except Exception as e:
+                            self.emit('status', f'电量读取失败：{e}')
                 self.emit('state', key, f'已连接 ({count}项)')
             except BaseException:
                 self.clients.pop(key, None)
@@ -285,9 +317,57 @@ class App:
 
     def row(self, key, **changes):
         if not self.table.exists(key):
-            self.table.insert('', 'end', iid=key, values=('', '', '', '', '', '', '', ''))
+            self.table.insert('', 'end', iid=key, values=('',) * 9)
         for name, value in changes.items():
             self.table.set(key, name, value)
+
+    def record_cadence(self, key, values):
+        value = values.get('cadence')
+        if not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
+            return
+        now = time.monotonic()
+        points = self.cadence_history.setdefault(key, deque(maxlen=3600))
+        points.append((now, value))
+        while points and points[0][0] < now - 60:
+            points.popleft()
+
+    def refresh_chart(self):
+        if self.closing:
+            return
+        self.draw_cadence()
+        self.root.after(1000, self.refresh_chart)
+
+    def draw_cadence(self):
+        canvas = self.chart
+        canvas.delete('all')
+        width, height = canvas.winfo_width(), canvas.winfo_height()
+        if width < 80 or height < 60:
+            return
+        left, right, top, bottom = 48, width - 15, 12, height - 28
+        now = time.monotonic()
+        key = self.selected()
+        points = self.cadence_history.get(key, ())
+        points = [(t, v) for t, v in points if now - 60 <= t <= now]
+        ceiling = max(120, math.ceil(max((v for _, v in points), default=0) / 20) * 20)
+        for i in range(4):
+            y = bottom - (bottom - top) * i / 3
+            canvas.create_line(left, y, right, y, fill='#e5e7eb')
+            canvas.create_text(left - 6, y, text=f'{ceiling * i / 3:.0f}', anchor='e', fill='#555555')
+        canvas.create_text(left, height - 8, text='-60 s', anchor='w', fill='#555555')
+        canvas.create_text(right, height - 8, text='现在', anchor='e', fill='#555555')
+        if not points:
+            canvas.create_text((left + right) / 2, (top + bottom) / 2,
+                               text='请选择设备，等待踏频数据', fill='#777777')
+            return
+        previous = None
+        for stamp, value in points:
+            x = right - (now - stamp) / 60 * (right - left)
+            y = bottom - value / ceiling * (bottom - top)
+            if previous is not None and stamp - previous[0] <= 5:
+                canvas.create_line(previous[1], previous[2], x, y, fill='#0879c9', width=2)
+            else:
+                canvas.create_oval(x - 2, y - 2, x + 2, y + 2, fill='#0879c9', outline='')
+            previous = (stamp, x, y)
 
     def poll(self):
         if self.closing:
@@ -313,9 +393,19 @@ class App:
                     self.row(key, protocol='ANT+', device=f'{number} / {trans}', name={11:'功率计', 120:'心率', 121:'速度/踏频', 122:'踏频'}.get(typ, f'类型 {typ}'), state='接收中')
                 elif kind == 'state':
                     self.row(args[0], state=args[1])
+                    if args[1] in ('已断开', '连接失败', '连接中'):
+                        self.decoder.reset_device(args[0])
+                        self.row(args[0], hr='', cadence='', power='', battery='')
+                elif kind == 'battery':
+                    key, data = args
+                    if len(data) == 1 and data[0] <= 100:
+                        self.row(key, battery=f'{data[0]}%')
+                    else:
+                        self.row(key, battery='--')
                 elif kind == 'measurement':
                     protocol, key, typ, data = args
                     values = self.decoder.ble(key, typ, data) if protocol == 'BLE' else self.decoder.ant(key, typ, data)
+                    self.record_cadence(key, values)
                     self.row(key, updated=datetime.now().strftime('%H:%M:%S'), **{k: f'{v:.1f}' if isinstance(v, float) else str(v) for k, v in values.items()})
                     self.log.config(state='normal')
                     self.log.insert('end', f'{datetime.now():%H:%M:%S} {key} {typ} {data.hex(" ")}\n')
@@ -325,6 +415,7 @@ class App:
                     self.log.config(state='disabled')
                 elif kind == 'serial_measurement':
                     key, number, typ, trans, data, values = args
+                    self.record_cadence(key, values)
                     self.row(key, protocol='ANT+ 串口', device=f'{number} / {trans}', name={11:'功率计', 120:'心率', 121:'速度/踏频', 122:'踏频'}.get(typ, f'类型 {typ}'), state='接收中', updated=datetime.now().strftime('%H:%M:%S'), **{k: f'{v:.1f}' if isinstance(v, float) else str(v) for k, v in values.items()})
                     self.log.config(state='normal')
                     self.log.insert('end', f'{datetime.now():%H:%M:%S} {key} {typ} {data.hex(" ")}\n')
